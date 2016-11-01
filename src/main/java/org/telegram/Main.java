@@ -10,12 +10,6 @@ import java.io.IOException;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 
-/**
- * @author Ruben Bermudez
- * @version 1.0
- * @brief Main class to create all bots
- * @date 20 of June of 2015
- */
 public class Main {
     private static final String LOGTAG = "MAIN";
 
@@ -39,7 +33,8 @@ public class Main {
                 telegramBotsApi.registerBot(new TransifexHandlers());
                 telegramBotsApi.registerBot(new FilesHandlers());
                 telegramBotsApi.registerBot(new CommandsHandler());*/
-                telegramBotsApi.registerBot(new SbertlHandlers());
+                //telegramBotsApi.registerBot(new SbertlHandlers());
+                telegramBotsApi.registerBot(new TimeHandlers());
             } catch (TelegramApiException e) {
                 BotLogger.error(LOGTAG, e);
             }

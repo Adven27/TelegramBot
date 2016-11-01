@@ -1226,7 +1226,7 @@ public class WeatherHandlers extends TelegramLongPollingBot {
     private static SendMessage onCurrentWeatherLocationReceived(Message message, String language) {
         String unitsSystem = DatabaseManager.getInstance().getUserWeatherOptions(message.getFrom().getId())[1];
         String weather = WeatherService.getInstance().fetchWeatherCurrentByLocation(message.getLocation().getLongitude(),
-                message.getLocation().getLatitude(), message.getFrom().getId(), language, unitsSystem);
+                message.getLocation().getLatitude(), language, unitsSystem);
         SendMessage sendMessageRequest = new SendMessage();
         sendMessageRequest.enableMarkdown(true);
         sendMessageRequest.setReplyMarkup(getMainMenuKeyboard(language));

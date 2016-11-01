@@ -11,7 +11,7 @@ public class Mamorator {
     }
 
     public String mamate(String m) {
-        return "Ð¼Ð°Ð¼" + (m.length() < 4 ? m.substring(1) : m.substring(2)) + "... " + dao.getEndWord(new Random().nextInt(4));
+        return "ìàì" + (m.length() < 4 ? m.substring(1) : m.substring(2)) + "... " + dao.getEndWord(new Random().nextInt(4));
     }
 
 }

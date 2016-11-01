@@ -6,6 +6,8 @@ public enum Stickers {
     DRINK("BQADAgADGwMAAi8P8AaO8R3qFJ6cpgI"),
     RUN("BQADAgADvAIAAi8P8AZyeCjjha4HpwI"),
     DANCE("BQADAgADHwMAAi8P8Aax9-Ibl9ozBwI"),
+    THINK("BQADAgAD4wIAAi8P8AZPctLFKjIGjwI"),
+    ASK("BQADAgAD4QIAAi8P8AbPKiGkzj2RIQI"),
     BLA("BQADAgADHQMAAi8P8AZUoPRpcJ7uiAI");
 
     private String id;

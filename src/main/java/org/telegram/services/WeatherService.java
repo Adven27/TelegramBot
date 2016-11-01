@@ -10,7 +10,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 import org.telegram.BuildVars;
-import org.telegram.database.DatabaseManager;
+import org.telegram.mamot.services.DAO;
 import org.telegram.telegrambots.logging.BotLogger;
 
 import java.io.UnsupportedEncodingException;
@@ -19,6 +19,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Random;
 
 /**
  * @author Ruben Bermudez
@@ -199,7 +200,6 @@ public class WeatherService {
     public String fetchWeatherCurrent(String city, Integer userId, String language, String units) {
         String cityFound;
         String responseToUser;
-        Emoji emoji = null;
         try {
             String completURL = BASEURL + CURRENTPATH + "?" + getCityQuery(city) +
                     CURRENTPARAMS.replace("@language@", language).replace("@units@", units) + APIIDEND;
@@ -216,9 +216,8 @@ public class WeatherService {
                 cityFound = jsonObject.getString("name") + " (" +
                         jsonObject.getJSONObject("sys").getString("country") + ")";
                 saveRecentWeather(userId, cityFound, jsonObject.getInt("id"));
-                emoji = getEmojiForWeather(jsonObject.getJSONArray("weather").getJSONObject(0));
                 responseToUser = String.format(LocalisationService.getInstance().getString("weatherCurrent", language),
-                        cityFound, convertCurrentWeatherToString(jsonObject, language, units, emoji));
+                        cityFound, convertCurrentWeatherToString(jsonObject));
             } else {
                 BotLogger.warn(LOGTAG, jsonObject.toString());
                 responseToUser = LocalisationService.getInstance().getString("cityNotFound", language);
@@ -236,7 +235,7 @@ public class WeatherService {
      * @return userHash to be send to use
      * @note Forecast for the following 3 days
      */
-    public String fetchWeatherCurrentByLocation(Double longitude, Double latitude, Integer userId, String language, String units) {
+    public String fetchWeatherCurrentByLocation(Double longitude, Double latitude, String language, String units) {
         String cityFound;
         String responseToUser;
         try {
@@ -253,11 +252,7 @@ public class WeatherService {
 
             JSONObject jsonObject = new JSONObject(responseString);
             if (jsonObject.getInt("cod") == 200) {
-                cityFound = jsonObject.getString("name") + " (" +
-                        jsonObject.getJSONObject("sys").getString("country") + ")";
-                saveRecentWeather(userId, cityFound, jsonObject.getInt("id"));
-                responseToUser = String.format(LocalisationService.getInstance().getString("weatherCurrent", language),
-                        cityFound, convertCurrentWeatherToString(jsonObject, language, units, null));
+                responseToUser = String.format("Сегодня в Мамологде %s", convertCurrentWeatherToString(jsonObject));
             } else {
                 BotLogger.warn(LOGTAG, jsonObject.toString());
                 responseToUser = LocalisationService.getInstance().getString("cityNotFound", language);
@@ -269,20 +264,16 @@ public class WeatherService {
         return responseToUser;
     }
 
-    private String convertCurrentWeatherToString(JSONObject jsonObject, String language, String units, Emoji emoji) {
-        String temp = ((int)jsonObject.getJSONObject("main").getDouble("temp"))+"";
+    private String convertCurrentWeatherToString(JSONObject jsonObject) {
+        String temp = ((int) jsonObject.getJSONObject("main").getDouble("temp")) + "";
         String cloudiness = jsonObject.getJSONObject("clouds").getInt("all") + "%";
-        String weatherDesc = jsonObject.getJSONArray("weather").getJSONObject(0).getString("description");
+        JSONObject weather = jsonObject.getJSONArray("weather").getJSONObject(0);
+        Emoji emoji = getEmojiForWeather(weather);
+        String weatherDesc = weather.getString("description");
 
-        String responseToUser;
-        if (units.equals(METRICSYSTEM)) {
-            responseToUser = LocalisationService.getInstance().getString("currentWeatherPartMetric", language);
-        } else {
-            responseToUser = LocalisationService.getInstance().getString("currentWeatherPartImperial", language);
-        }
-        responseToUser = String.format(responseToUser, emoji == null ? weatherDesc : emoji.toString(), cloudiness, temp);
-
-        return responseToUser;
+        return String.format(" %s %s %s?C мамоблачность %s... %s",
+                emoji == null ? "" : emoji.toString(), weatherDesc, temp, cloudiness,
+                new DAO().getEndWord(new Random().nextInt(4)));
     }
 
     /**
@@ -344,7 +335,7 @@ public class WeatherService {
     }
 
     private void saveRecentWeather(Integer userId, String cityName, int cityId) {
-        DatabaseManager.getInstance().addRecentWeather(userId, cityId, cityName);
+        //DatabaseManager.getInstance().addRecentWeather(userId, cityId, cityName);
     }
 
     private String getCityQuery(String city) throws UnsupportedEncodingException {
@@ -358,45 +349,34 @@ public class WeatherService {
     }
 
     private Emoji getEmojiForWeather(JSONObject weather) {
-        Emoji emoji;
-
         switch(weather.getString("icon")) {
             case "01n":
             case "01d":
-                emoji = Emoji.SUN_WITH_FACE;
-                break;
+                return Emoji.SUN_WITH_FACE;
             case "02n":
             case "02d":
-                emoji = Emoji.SUN_BEHIND_CLOUD;
-                break;
+                return Emoji.SUN_BEHIND_CLOUD;
             case "03n":
             case "03d":
             case "04n":
             case "04d":
-                emoji = Emoji.CLOUD;
-                break;
+                return Emoji.CLOUD;
             case "09n":
             case "09d":
             case "10n":
             case "10d":
-                emoji = Emoji.UMBRELLA_WITH_RAIN_DROPS;
-                break;
+                return Emoji.UMBRELLA_WITH_RAIN_DROPS;
             case "11n":
             case "11d":
-                emoji = Emoji.HIGH_VOLTAGE_SIGN;
-                break;
+                return Emoji.HIGH_VOLTAGE_SIGN;
             case "13n":
             case "13d":
-                emoji = Emoji.SNOWFLAKE;
-                break;
+                return Emoji.SNOWFLAKE;
             case "50n":
             case "50d":
-                emoji = Emoji.FOGGY;
-                break;
+                return Emoji.FOGGY;
             default:
-                emoji = null;
+                return null;
         }
-
-        return emoji;
     }
 }

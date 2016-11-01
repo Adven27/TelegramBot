@@ -17,7 +17,7 @@ public class BuildVars {
     public static final String pathToCertificateStore = "./YOURSTORE.jks"; //self-signed and non-self-signed.
     public static final String certificateStorePassword = "yourpass"; //password for your certificate-store
 
-    public static final String OPENWEATHERAPIKEY = "<your-api-key>";
+    public static final String OPENWEATHERAPIKEY = "70f61f3bdf754f840006e26a969b7e83";
 
     public static final String DirectionsApiKey = "<your-api-key>";
 

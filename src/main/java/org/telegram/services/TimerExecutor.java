@@ -2,12 +2,15 @@ package org.telegram.services;
 
 import org.telegram.telegrambots.logging.BotLogger;
 
-import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+
+import static java.time.LocalDateTime.now;
+import static java.util.concurrent.TimeUnit.DAYS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
  * @author Ruben Bermudez
@@ -56,19 +59,34 @@ public class TimerExecutor {
      * @param targetSec  Second to execute it
      */
     public void startExecutionEveryDayAt(CustomTimerTask task, int targetHour, int targetMin, int targetSec) {
-        BotLogger.warn(LOGTAG, "Posting new task" + task.getTaskName());
+        BotLogger.warn(LOGTAG, "Posting new task " + task.getTaskName());
         final Runnable taskWrapper = () -> {
             try {
                 task.execute();
                 task.reduceTimes();
-                startExecutionEveryDayAt(task, targetHour, targetMin, targetSec);
+                startExecutionEveryDayAt(task, new Random().nextInt(12) + 9 , new Random().nextInt(59), 0);
             } catch (Exception e) {
                 BotLogger.severe(LOGTAG, "Bot threw an unexpected exception at TimerExecutor", e);
             }
         };
         if (task.getTimes() != 0) {
-            final long delay = computNextDilay(targetHour, targetMin, targetSec);
-            executorService.schedule(taskWrapper, delay, TimeUnit.SECONDS);
+            executorService.schedule(taskWrapper, computeNextDelay(targetHour, targetMin, targetSec), SECONDS);
+        }
+    }
+
+    public void startExecutionOnRandomHourAt(CustomTimerTask task, int targetHour, int targetMin, int targetSec) {
+        BotLogger.warn(LOGTAG, "Posting new task " + task.getTaskName());
+        final Runnable taskWrapper = () -> {
+            try {
+                task.execute();
+                task.reduceTimes();
+                startExecutionOnRandomHourAt(task, new Random().nextInt(12) + 9 , new Random().nextInt(59), 0);
+            } catch (Exception e) {
+                BotLogger.severe(LOGTAG, "Bot threw an unexpected exception at TimerExecutor", e);
+            }
+        };
+        if (task.getTimes() != 0) {
+            executorService.schedule(taskWrapper, computeNextHour(targetHour, targetMin, targetSec), SECONDS);
         }
     }
 
@@ -80,15 +98,22 @@ public class TimerExecutor {
      * @param targetSec  Target second
      * @return time in second to wait
      */
-    private long computNextDilay(int targetHour, int targetMin, int targetSec) {
-        final LocalDateTime localNow = LocalDateTime.now(Clock.systemUTC());
-        LocalDateTime localNextTarget = localNow.withHour(targetHour).withMinute(targetMin).withSecond(targetSec);
-        while (localNow.compareTo(localNextTarget) > 0) {
-            localNextTarget = localNextTarget.plusDays(1);
+    private long computeNextDelay(int targetHour, int targetMin, int targetSec) {
+        final LocalDateTime now = now();
+        LocalDateTime nextTime = now.withHour(targetHour).withMinute(targetMin).withSecond(targetSec);
+        while (now.compareTo(nextTime) > 0) {
+            nextTime = nextTime.plusDays(1);
         }
+        return Duration.between(now, nextTime).getSeconds();
+    }
 
-        final Duration duration = Duration.between(localNow, localNextTarget);
-        return duration.getSeconds();
+    private long computeNextHour(int targetHour, int targetMin, int targetSec) {
+        final LocalDateTime now = now();
+        LocalDateTime nextTime = now.withHour(targetHour).withMinute(targetMin).withSecond(targetSec);
+        while (now.compareTo(nextTime) > 0 && nextTime.getHour() > 8 && nextTime.getHour() < 22) {
+            nextTime = nextTime.plusHours(new Random().nextInt(3) + 1);
+        }
+        return Duration.between(now, nextTime).getSeconds();
     }
 
     @Override
@@ -102,7 +127,7 @@ public class TimerExecutor {
     public void stop() {
         executorService.shutdown();
         try {
-            executorService.awaitTermination(1, TimeUnit.DAYS);
+            executorService.awaitTermination(1, DAYS);
         } catch (InterruptedException ex) {
             BotLogger.severe(LOGTAG, ex);
         } catch (Exception e) {
