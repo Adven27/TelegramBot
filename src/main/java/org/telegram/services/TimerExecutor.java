@@ -64,7 +64,7 @@ public class TimerExecutor {
             try {
                 task.execute();
                 task.reduceTimes();
-                startExecutionEveryDayAt(task, new Random().nextInt(12) + 9 , new Random().nextInt(59), 0);
+                startExecutionEveryDayAt(task, targetHour, targetMin, targetSec);
             } catch (Exception e) {
                 BotLogger.severe(LOGTAG, "Bot threw an unexpected exception at TimerExecutor", e);
             }

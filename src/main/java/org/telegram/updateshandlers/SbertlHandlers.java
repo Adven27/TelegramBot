@@ -106,6 +106,8 @@ quote - some random stuff from noosphere...
                                 sendMessage(send);
                             } else if (text.startsWith(WHO)) {
                                 who(chatId, text);
+                            } else if (text.startsWith("/die")) {
+                                System.exit(0);
                             }
                         }
                     }
