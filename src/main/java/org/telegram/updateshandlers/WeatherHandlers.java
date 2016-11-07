@@ -3,11 +3,12 @@ package org.telegram.updateshandlers;
 import org.telegram.BotConfig;
 import org.telegram.Commands;
 import org.telegram.database.DatabaseManager;
-import org.telegram.services.CustomTimerTask;
-import org.telegram.services.Emoji;
-import org.telegram.services.LocalisationService;
-import org.telegram.services.TimerExecutor;
-import org.telegram.services.WeatherService;
+import org.telegram.mamot.services.DAO;
+import org.telegram.services.*;
+import org.telegram.services.impl.SimpleWeatherService;
+import org.telegram.services.impl.WeatherPrinter;
+import org.telegram.services.impl.WeatherResource;
+import org.telegram.services.impl.WeatherServiceLoggingDecorator;
 import org.telegram.structure.WeatherAlert;
 import org.telegram.telegrambots.TelegramApiException;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
@@ -47,6 +48,7 @@ public class WeatherHandlers extends TelegramLongPollingBot {
     private static final int SETTINGS = 11;
     private static final int LANGUAGE = 12;
     private static final int UNITS = 13;
+    private static WeatherService weatherService = WeatherServiceLoggingDecorator.getInstance(SimpleWeatherService.getInstance(new WeatherPrinter(LocalisationService.getInstance(), new DAO()), new WeatherResource()),LocalisationService.getInstance());
 
     public WeatherHandlers() {
         super();
@@ -104,8 +106,8 @@ public class WeatherHandlers extends TelegramLongPollingBot {
                 }
             }
             String[] userOptions = DatabaseManager.getInstance().getUserWeatherOptions(weatherAlert.getUserId());
-            String weather = WeatherService.getInstance().fetchWeatherAlert(weatherAlert.getCityId(),
-                    weatherAlert.getUserId(), userOptions[0], userOptions[1]);
+
+            String weather = weatherService.fetchWeatherForecastByCity(Integer.toString(weatherAlert.getCityId()), userOptions[0], userOptions[1]);
             SendMessage sendMessage = new SendMessage();
             sendMessage.enableMarkdown(true);
             sendMessage.setChatId(String.valueOf(weatherAlert.getUserId()));
@@ -457,10 +459,7 @@ public class WeatherHandlers extends TelegramLongPollingBot {
                 sendMessageRequest = onBackUnitsCommand(message, language);
             } else if (message.getText().trim().equals(LocalisationService.getInstance().getString("metricSystem", language))) {
                 sendMessageRequest = onUnitsChosen(message.getFrom().getId(), message.getChatId(),
-                        message.getMessageId(), WeatherService.METRICSYSTEM, language);
-            } else if (message.getText().trim().equals(LocalisationService.getInstance().getString("imperialSystem", language))) {
-                sendMessageRequest = onUnitsChosen(message.getFrom().getId(), message.getChatId(),
-                        message.getMessageId(), WeatherService.IMPERIALSYSTEM, language);
+                        message.getMessageId(), "metric", language);
             } else {
                 sendMessageRequest = onUnitsError(message.getChatId(), message.getMessageId(), language);
             }
@@ -616,7 +615,7 @@ public class WeatherHandlers extends TelegramLongPollingBot {
         Integer cityId = DatabaseManager.getInstance().getRecentWeatherIdByCity(userId, text);
         if (cityId != null) {
             String unitsSystem = DatabaseManager.getInstance().getUserWeatherOptions(userId)[1];
-            String weather = WeatherService.getInstance().fetchWeatherForecast(cityId.toString(), userId, language, unitsSystem);
+            String weather = weatherService.fetchWeatherForecastByCity(cityId.toString(), language, unitsSystem);
             SendMessage sendMessageRequest = new SendMessage();
             sendMessageRequest.enableMarkdown(true);
             sendMessageRequest.setReplyMarkup(getMainMenuKeyboard(language));
@@ -718,7 +717,7 @@ public class WeatherHandlers extends TelegramLongPollingBot {
         Integer cityId = DatabaseManager.getInstance().getRecentWeatherIdByCity(userId, text);
         if (cityId != null) {
             String unitsSystem = DatabaseManager.getInstance().getUserWeatherOptions(userId)[1];
-            String weather = WeatherService.getInstance().fetchWeatherCurrent(cityId.toString(), userId, language, unitsSystem);
+            String weather = weatherService.fetchWeatherCurrent(cityId.toString(), language, unitsSystem);
             SendMessage sendMessageRequest = new SendMessage();
             sendMessageRequest.enableMarkdown(true);
             sendMessageRequest.setReplyMarkup(getMainMenuKeyboard(language));
@@ -1196,8 +1195,8 @@ public class WeatherHandlers extends TelegramLongPollingBot {
 
     private static SendMessage onForecastWeatherLocationReceived(Message message, String language) {
         String unitsSystem = DatabaseManager.getInstance().getUserWeatherOptions(message.getFrom().getId())[1];
-        String weather = WeatherService.getInstance().fetchWeatherForecastByLocation(message.getLocation().getLongitude(),
-                message.getLocation().getLatitude(), message.getFrom().getId(), language, unitsSystem);
+        String weather = weatherService.fetchWeatherForecastByLocation(message.getLocation().getLongitude(),
+                message.getLocation().getLatitude(), language, unitsSystem);
         SendMessage sendMessageRequest = new SendMessage();
         sendMessageRequest.enableMarkdown(true);
         sendMessageRequest.setReplyMarkup(getMainMenuKeyboard(language));
@@ -1211,7 +1210,7 @@ public class WeatherHandlers extends TelegramLongPollingBot {
 
     private static SendMessage onForecastWeatherReceived(Long chatId, Integer userId, Integer messageId, String text, String language) {
         String unitsSystem = DatabaseManager.getInstance().getUserWeatherOptions(userId)[1];
-        String weather = WeatherService.getInstance().fetchWeatherForecast(text, userId, language, unitsSystem);
+        String weather = weatherService.fetchWeatherForecastByCity(text, language, unitsSystem);
         SendMessage sendMessageRequest = new SendMessage();
         sendMessageRequest.enableMarkdown(true);
         sendMessageRequest.setReplyMarkup(getMainMenuKeyboard(language));
@@ -1225,7 +1224,7 @@ public class WeatherHandlers extends TelegramLongPollingBot {
 
     private static SendMessage onCurrentWeatherLocationReceived(Message message, String language) {
         String unitsSystem = DatabaseManager.getInstance().getUserWeatherOptions(message.getFrom().getId())[1];
-        String weather = WeatherService.getInstance().fetchWeatherCurrentByLocation(message.getLocation().getLongitude(),
+        String weather = weatherService.fetchWeatherCurrentByLocation(message.getLocation().getLongitude(),
                 message.getLocation().getLatitude(), language, unitsSystem);
         SendMessage sendMessageRequest = new SendMessage();
         sendMessageRequest.enableMarkdown(true);
@@ -1240,7 +1239,7 @@ public class WeatherHandlers extends TelegramLongPollingBot {
 
     private static SendMessage onCurrentWeatherReceived(Long chatId, Integer userId, Integer messageId, String text, String language) {
         String unitsSystem = DatabaseManager.getInstance().getUserWeatherOptions(userId)[1];
-        String weather = WeatherService.getInstance().fetchWeatherCurrent(text, userId, language, unitsSystem);
+        String weather = weatherService.fetchWeatherCurrent(text, language, unitsSystem);
         SendMessage sendMessageRequest = new SendMessage();
         sendMessageRequest.enableMarkdown(true);
         sendMessageRequest.setReplyMarkup(getMainMenuKeyboard(language));

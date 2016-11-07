@@ -4,10 +4,8 @@ import org.telegram.BotConfig;
 import org.telegram.mamot.services.BardakMenu;
 import org.telegram.mamot.services.DAO;
 import org.telegram.mamot.services.Mamorator;
-import org.telegram.services.QuoteService;
-import org.telegram.services.RaeService;
-import org.telegram.services.Stickers;
-import org.telegram.services.WeatherService;
+import org.telegram.services.*;
+import org.telegram.services.impl.QuoteService;
 import org.telegram.telegrambots.TelegramApiException;
 import org.telegram.telegrambots.api.methods.AnswerInlineQuery;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
@@ -28,6 +26,7 @@ import java.util.List;
 import java.util.Random;
 
 import static java.time.LocalDateTime.now;
+import static org.telegram.services.Stickers.THINK;
 
 public class SbertlHandlers extends TelegramLongPollingBot {
 
@@ -49,8 +48,12 @@ quote - some random stuff from noosphere...
 
     private Mamorator mamorator;
     private BardakMenu bardakMenu;
+    protected WeatherService weatherService;
+    protected QuoteService quoteService;
 
-    public SbertlHandlers() {
+    public SbertlHandlers(WeatherService weatherService, QuoteService quoteService) {
+        this.weatherService = weatherService;
+        this.quoteService = quoteService;
         mamorator = new Mamorator(DAO);
         bardakMenu = new BardakMenu(DAO);
     }
@@ -82,7 +85,7 @@ quote - some random stuff from noosphere...
                             } else if (text.startsWith(BARDAK)) {
                                 sendText(chatId, bardakMenu.menu(now()));
                             } else if (text.startsWith("/weather")) {
-                                String weather = WeatherService.getInstance().fetchWeatherCurrentByLocation(
+                                String weather = weatherService.fetchWeatherCurrentByLocation(
                                         39.888599, 59.2187,
                                         "ru", "metric");
                                 SendMessage send = new SendMessage();
@@ -95,10 +98,10 @@ quote - some random stuff from noosphere...
                                 SendSticker sticker = new SendSticker();
                                 sticker.setChatId(chatId);
                                 sticker.setReplyToMessageId(msg.getMessageId());
-                                sticker.setSticker(Stickers.THINK.getId());
+                                sticker.setSticker(THINK.getId());
                                 sendSticker(sticker);
 
-                                String quote = QuoteService.getInstance().fetchQuote();
+                                String quote = quoteService.fetchQuote();
                                 SendMessage send = new SendMessage();
                                 send.disableWebPagePreview();
                                 send.setText(quote);
@@ -107,6 +110,7 @@ quote - some random stuff from noosphere...
                             } else if (text.startsWith(WHO)) {
                                 who(chatId, text);
                             } else if (text.startsWith("/die")) {
+                                TimerExecutor.getInstance().stop();
                                 System.exit(0);
                             }
                         }

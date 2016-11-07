@@ -1,4 +1,4 @@
-package org.telegram.services;
+package org.telegram.services.impl;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -11,29 +11,14 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 import org.telegram.telegrambots.logging.BotLogger;
 
-/**
- * @author Ruben Bermudez
- * @version 1.0
- * @brief Weather service
- * @date 20 of June of 2015
- */
 public class QuoteService {
     private static final String LOGTAG = "FORISMATICSERVICE";
 
-    private static final String BASEURL = "http://api.forismatic.com/api/1.0/?method=getQuote&format=json"; ///< Base url for REST
-    private static volatile QuoteService instance; ///< Instance of this class
+    private static final String BASEURL = "http://api.forismatic.com/api/1.0/?method=getQuote&format=json";
+    private static volatile QuoteService instance;
 
-    /**
-     * Constructor (private due to singleton pattern)
-     */
-    private QuoteService() {
-    }
+    private QuoteService() {}
 
-    /**
-     * Singleton
-     *
-     * @return Return the instance of this class
-     */
     public static QuoteService getInstance() {
         QuoteService currentInstance;
         if (instance == null) {

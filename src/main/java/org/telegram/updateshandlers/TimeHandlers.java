@@ -1,27 +1,26 @@
 package org.telegram.updateshandlers;
 
-import org.telegram.services.CustomTimerTask;
-import org.telegram.services.QuoteService;
-import org.telegram.services.Stickers;
-import org.telegram.services.TimerExecutor;
+import org.telegram.services.*;
+import org.telegram.services.impl.QuoteService;
 import org.telegram.telegrambots.TelegramApiException;
 
 import java.time.LocalTime;
 
 import static org.telegram.services.Stickers.DRINK;
 import static org.telegram.services.Stickers.RUN;
+import static org.telegram.services.Stickers.THINK;
 
 public class TimeHandlers extends SbertlHandlers {
 
-    public TimeHandlers() {
-        super();
+    public TimeHandlers(final WeatherService weatherService, final QuoteService quoteService) {
+        super(weatherService, quoteService);
         for (Events e : Events.values()) {
             startAlertTimers(e);
         }
         TimerExecutor.getInstance().startExecutionOnRandomHourAt(new CustomTimerTask("Quotes", -1) {
             @Override
             public void execute() {
-                sendAlerts(QuoteService.getInstance().fetchQuote(), Stickers.THINK);
+                sendAlerts(quoteService.fetchQuote(), THINK);
             }
         }, 18 , 23, 0);
     }

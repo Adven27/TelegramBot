@@ -1,5 +1,8 @@
 package org.telegram;
 
+import org.telegram.mamot.services.DAO;
+import org.telegram.services.*;
+import org.telegram.services.impl.*;
 import org.telegram.telegrambots.TelegramApiException;
 import org.telegram.telegrambots.TelegramBotsApi;
 import org.telegram.telegrambots.logging.BotLogger;
@@ -34,7 +37,15 @@ public class Main {
                 telegramBotsApi.registerBot(new FilesHandlers());
                 telegramBotsApi.registerBot(new CommandsHandler());*/
                 //telegramBotsApi.registerBot(new SbertlHandlers());
-                telegramBotsApi.registerBot(new TimeHandlers());
+
+                QuoteService quoteService = QuoteService.getInstance();
+                LocalisationService localisationService = LocalisationService.getInstance();
+                WeatherPrinter weatherPrinter = new WeatherPrinter(localisationService, new DAO());
+                WeatherResource weatherResource = new WeatherResource();
+                WeatherService weatherService = WeatherServiceLoggingDecorator.getInstance(
+                        SimpleWeatherService.getInstance(weatherPrinter, weatherResource), localisationService);
+
+                telegramBotsApi.registerBot(new TimeHandlers(weatherService, quoteService));
             } catch (TelegramApiException e) {
                 BotLogger.error(LOGTAG, e);
             }
