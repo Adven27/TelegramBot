@@ -1,6 +1,7 @@
 package org.telegram.updateshandlers;
 
 import org.telegram.services.*;
+import org.telegram.services.impl.JokePrinter;
 import org.telegram.services.impl.QuoteService;
 import org.telegram.telegrambots.TelegramApiException;
 
@@ -12,8 +13,8 @@ import static org.telegram.services.Stickers.THINK;
 
 public class TimeHandlers extends SbertlHandlers {
 
-    public TimeHandlers(final WeatherService weatherService, final QuoteService quoteService) {
-        super(weatherService, quoteService);
+    public TimeHandlers(final WeatherService weatherService, final QuoteService quoteService, final JokePrinter jokePrinter) {
+        super(weatherService, quoteService, jokePrinter);
         for (Events e : Events.values()) {
             startAlertTimers(e);
         }

@@ -44,8 +44,9 @@ public class Main {
                 WeatherResource weatherResource = new WeatherResource();
                 WeatherService weatherService = WeatherServiceLoggingDecorator.getInstance(
                         SimpleWeatherService.getInstance(weatherPrinter, weatherResource), localisationService);
+                JokePrinter jokePrinter = new JokePrinter(new JokeResource());
 
-                telegramBotsApi.registerBot(new TimeHandlers(weatherService, quoteService));
+                telegramBotsApi.registerBot(new TimeHandlers(weatherService, quoteService, jokePrinter));
             } catch (TelegramApiException e) {
                 BotLogger.error(LOGTAG, e);
             }

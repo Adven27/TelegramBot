@@ -1,21 +1,14 @@
 package org.telegram.services.impl;
 
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.entity.BufferedHttpEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 import org.telegram.BuildVars;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import static java.lang.Integer.parseInt;
 import static java.net.URLEncoder.encode;
 
-public class WeatherResource {
+public class WeatherResource extends JsonResource {
 
     private static final String BASEURL = "http://api.openweathermap.org/data/2.5/";
     private static final String FORECASTPATH = "forecast/daily";
@@ -24,29 +17,19 @@ public class WeatherResource {
     private static final String REQUEST_PARAMS = "&cnt=1&units=@units@&lang=@language@";
 
     public JSONObject fetchForecastBy(String city, String language, String units) {
-        return getResponseFrom(buildForecastUrlBy(city, language, units));
+        return getObjectFrom(buildForecastUrlBy(city, language, units));
     }
 
     public JSONObject fetchForecastBy(Double longitude, Double latitude, String language, String units) {
-        return getResponseFrom(buildForecastUrlBy(longitude, latitude, language, units));
+        return getObjectFrom(buildForecastUrlBy(longitude, latitude, language, units));
     }
 
     public JSONObject fetchCurrentBy(String city, String language, String units) {
-        return getResponseFrom(buildCurrentWeatherUrlBy(city, language, units));
+        return getObjectFrom(buildCurrentWeatherUrlBy(city, language, units));
     }
 
     public JSONObject fetchCurrentBy(Double longitude, Double latitude, String language, String units) {
-        return getResponseFrom(buildCurrentWeatherUrlBy(longitude, latitude, language, units));
-    }
-
-    private JSONObject getResponseFrom(String url) {
-        try {
-            CloseableHttpClient client = HttpClientBuilder.create().setSSLHostnameVerifier(new NoopHostnameVerifier()).build();
-            BufferedHttpEntity buf = new BufferedHttpEntity(client.execute(new HttpGet(url)).getEntity());
-            return new JSONObject(EntityUtils.toString(buf, "UTF-8"));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return getObjectFrom(buildCurrentWeatherUrlBy(longitude, latitude, language, units));
     }
 
     private String buildRequestUrl(String type, String query, String lang, String units) {

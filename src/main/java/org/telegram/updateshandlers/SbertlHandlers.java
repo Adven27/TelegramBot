@@ -5,6 +5,7 @@ import org.telegram.mamot.services.BardakMenu;
 import org.telegram.mamot.services.DAO;
 import org.telegram.mamot.services.Mamorator;
 import org.telegram.services.*;
+import org.telegram.services.impl.JokePrinter;
 import org.telegram.services.impl.QuoteService;
 import org.telegram.telegrambots.TelegramApiException;
 import org.telegram.telegrambots.api.methods.AnswerInlineQuery;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.Random;
 
 import static java.time.LocalDateTime.now;
+import static org.telegram.services.Stickers.LOL;
 import static org.telegram.services.Stickers.THINK;
 
 public class SbertlHandlers extends TelegramLongPollingBot {
@@ -50,10 +52,12 @@ quote - some random stuff from noosphere...
     private BardakMenu bardakMenu;
     protected WeatherService weatherService;
     protected QuoteService quoteService;
+    private JokePrinter jokePrinter;
 
-    public SbertlHandlers(WeatherService weatherService, QuoteService quoteService) {
+    public SbertlHandlers(WeatherService weatherService, QuoteService quoteService, JokePrinter jokePrinter) {
         this.weatherService = weatherService;
         this.quoteService = quoteService;
+        this.jokePrinter = jokePrinter;
         mamorator = new Mamorator(DAO);
         bardakMenu = new BardakMenu(DAO);
     }
@@ -85,28 +89,11 @@ quote - some random stuff from noosphere...
                             } else if (text.startsWith(BARDAK)) {
                                 sendText(chatId, bardakMenu.menu(now()));
                             } else if (text.startsWith("/weather")) {
-                                String weather = weatherService.fetchWeatherCurrentByLocation(
-                                        39.888599, 59.2187,
-                                        "ru", "metric");
-                                SendMessage send = new SendMessage();
-                                send.enableMarkdown(true);
-                                send.setReplyToMessageId(msg.getMessageId());
-                                send.setText(weather);
-                                send.setChatId(msg.getChatId().toString());
-                                sendMessage(send);
+                                weather(msg);
                             } else if (text.startsWith("/quote")) {
-                                SendSticker sticker = new SendSticker();
-                                sticker.setChatId(chatId);
-                                sticker.setReplyToMessageId(msg.getMessageId());
-                                sticker.setSticker(THINK.getId());
-                                sendSticker(sticker);
-
-                                String quote = quoteService.fetchQuote();
-                                SendMessage send = new SendMessage();
-                                send.disableWebPagePreview();
-                                send.setText(quote);
-                                send.setChatId(msg.getChatId().toString());
-                                sendMessage(send);
+                                quote(msg);
+                            } else if (text.startsWith("/ha")) {
+                                ha(msg);
                             } else if (text.startsWith(WHO)) {
                                 who(chatId, text);
                             } else if (text.startsWith("/die")) {
@@ -117,11 +104,54 @@ quote - some random stuff from noosphere...
                     }
                 }
             } catch (TelegramApiException e) {
-                //do some error handling
+                BotLogger.error("SbertlHandlers", e);
             }
         } else if (update.hasInlineQuery()) {
             handleIncomingInlineQuery(update.getInlineQuery());
         }
+    }
+
+    private void weather(Message msg) throws TelegramApiException {
+        String weather = weatherService.fetchWeatherCurrentByLocation(
+                39.888599, 59.2187,
+                "ru", "metric");
+        SendMessage send = new SendMessage();
+        send.enableMarkdown(true);
+        send.setReplyToMessageId(msg.getMessageId());
+        send.setText(weather);
+        send.setChatId(msg.getChatId().toString());
+        sendMessage(send);
+    }
+
+    private void quote(Message msg) throws TelegramApiException {
+        SendSticker sticker = new SendSticker();
+        sticker.setChatId(msg.getChatId().toString());
+        sticker.setReplyToMessageId(msg.getMessageId());
+        sticker.setSticker(THINK.getId());
+        sendSticker(sticker);
+
+        String quote = quoteService.fetchQuote();
+        SendMessage send = new SendMessage();
+        send.disableWebPagePreview();
+        send.setText(quote);
+        send.setChatId(msg.getChatId().toString());
+        sendMessage(send);
+    }
+
+    private void ha(Message msg) throws TelegramApiException {
+        SendSticker sticker = new SendSticker();
+        sticker.setChatId(msg.getChatId().toString());
+        sticker.setReplyToMessageId(msg.getMessageId());
+        sticker.setSticker(LOL.getId());
+        sendSticker(sticker);
+
+        String txt = jokePrinter.print();
+        SendMessage send = new SendMessage();
+        send.disableWebPagePreview();
+        send.enableHtml(true);
+        send.setText(txt);
+        send.setChatId(msg.getChatId().toString());
+        sendMessage(send);
     }
 
     private void handleIncomingInlineQuery(InlineQuery inlineQuery) {
