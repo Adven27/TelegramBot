@@ -1,21 +1,16 @@
 package org.telegram.services.impl;
 
-import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
+import org.telegram.services.MessagePrinter;
 
 import java.util.Map;
 
-public class JokePrinter {
+import static java.lang.String.format;
+import static org.jsoup.Jsoup.clean;
 
-    private JokeResource jokeResource;
+public class JokePrinter implements MessagePrinter {
 
-    public JokePrinter(JokeResource jokeResource) {
-        this.jokeResource = jokeResource;
-    }
-
-    public String print() {
-        Map<String, String> data = jokeResource.fetch();
-        String text = data.get("text");
-        return String.format("%s \n %s", Jsoup.clean(text, Whitelist.basic()).replace("<br>",""), data.get("site"));
+    public String print(Map<String, String> data) {
+        return format("%s \n %s", clean(data.get("text"), Whitelist.basic()).replace("<br>", ""), data.get("site"));
     }
 }

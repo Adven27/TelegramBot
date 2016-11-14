@@ -1,13 +1,16 @@
 package org.telegram;
 
+import org.telegram.commands.*;
 import org.telegram.mamot.services.DAO;
-import org.telegram.services.*;
+import org.telegram.services.LocalizationService;
+import org.telegram.services.Weather;
 import org.telegram.services.impl.*;
-import org.telegram.telegrambots.TelegramApiException;
 import org.telegram.telegrambots.TelegramBotsApi;
+import org.telegram.telegrambots.exceptions.TelegramApiException;
 import org.telegram.telegrambots.logging.BotLogger;
 import org.telegram.telegrambots.logging.BotsFileHandler;
-import org.telegram.updateshandlers.*;
+import org.telegram.updateshandlers.CommandsHandler;
+import org.telegram.updateshandlers.WebHookExampleHandlers;
 
 import java.io.IOException;
 import java.util.logging.ConsoleHandler;
@@ -28,7 +31,6 @@ public class Main {
         try {
             TelegramBotsApi telegramBotsApi = createTelegramBotsApi();
             try {
-                // Register long polling bots. They work regardless type of TelegramBotsApi we are creating
                 /*telegramBotsApi.registerBot(new ChannelHandlers());
                 telegramBotsApi.registerBot(new DirectionsHandlers());
                 telegramBotsApi.registerBot(new RaeHandlers());
@@ -38,15 +40,24 @@ public class Main {
                 telegramBotsApi.registerBot(new CommandsHandler());*/
                 //telegramBotsApi.registerBot(new SbertlHandlers());
 
-                QuoteService quoteService = QuoteService.getInstance();
-                LocalisationService localisationService = LocalisationService.getInstance();
-                WeatherPrinter weatherPrinter = new WeatherPrinter(localisationService, new DAO());
-                WeatherResource weatherResource = new WeatherResource();
-                WeatherService weatherService = WeatherServiceLoggingDecorator.getInstance(
-                        SimpleWeatherService.getInstance(weatherPrinter, weatherResource), localisationService);
-                JokePrinter jokePrinter = new JokePrinter(new JokeResource());
 
-                telegramBotsApi.registerBot(new TimeHandlers(weatherService, quoteService, jokePrinter));
+                final LocalizationService localizationService = new LocalizationService();
+                final DAO dao = new DAO();
+                WeatherPrinter weatherPrinter = new WeatherPrinter(localizationService, dao);
+                WeatherResource weatherResource = new WeatherResource();
+                Weather weather = new WeatherLoggingDecorator(
+                        new SimpleWeather(weatherPrinter, weatherResource), localizationService);
+
+                QuoteCommand quote = new QuoteCommand(new MessageFromURL(new QuoteResource(), new QuotePrinter()));
+                JokeCommand joke = new JokeCommand(new MessageFromURL(new JokeResource(), new JokePrinter()));
+
+                telegramBotsApi.registerBot(new CommandsHandler(quote, joke,
+                        new WeatherCommand(weather),
+                        new WhoCommand(),
+                        new SupCommand(dao),
+                        new BardakCommand(dao)));
+
+                //telegramBotsApi.registerBot(new TimeHandlers(weather, quote, quote, joke));
             } catch (TelegramApiException e) {
                 BotLogger.error(LOGTAG, e);
             }

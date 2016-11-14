@@ -3,9 +3,9 @@ package org.telegram.updateshandlers;
 import org.telegram.BotConfig;
 import org.telegram.Commands;
 import org.telegram.database.DatabaseManager;
-import org.telegram.services.LocalisationService;
+import org.telegram.services.LocalizationService;
 import org.telegram.services.TransifexService;
-import org.telegram.telegrambots.TelegramApiException;
+import org.telegram.telegrambots.exceptions.TelegramApiException;
 import org.telegram.telegrambots.api.methods.send.SendDocument;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Message;
@@ -23,6 +23,7 @@ import java.io.InvalidObjectException;
  */
 public class TransifexHandlers extends TelegramLongPollingBot {
     private static final String LOGTAG = "TRANSIFEXHANDLERS";
+    private static final LocalizationService LOCALIZATION = new LocalizationService();
 
     @Override
     public String getBotToken() {
@@ -68,7 +69,7 @@ public class TransifexHandlers extends TelegramLongPollingBot {
                 } else if (parts[0].startsWith(Commands.help)) {
                     SendMessage sendMessageRequest = new SendMessage();
                     String helpFormated = String.format(
-                            LocalisationService.getInstance().getString("helpTransifex", language),
+                            LOCALIZATION.getString("helpTransifex", language),
                             Commands.transifexiOSCommand, Commands.transifexAndroidCommand, Commands.transifexWebogram,
                             Commands.transifexTDesktop, Commands.transifexOSX, Commands.transifexWP,
                             Commands.transifexAndroidSupportCommand);
@@ -93,7 +94,7 @@ public class TransifexHandlers extends TelegramLongPollingBot {
                     (message.getText().startsWith(Commands.startCommand) || !message.isGroupMessage())) {
                 SendMessage sendMessageRequest = new SendMessage();
                 String helpFormated = String.format(
-                        LocalisationService.getInstance().getString("helpTransifex", language),
+                        LOCALIZATION.getString("helpTransifex", language),
                         Commands.transifexiOSCommand, Commands.transifexAndroidCommand, Commands.transifexWebogram,
                         Commands.transifexTDesktop, Commands.transifexOSX, Commands.transifexWP,
                         Commands.transifexAndroidSupportCommand);

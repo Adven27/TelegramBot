@@ -1,20 +1,14 @@
 package org.telegram.commands;
 
-import org.telegram.database.DatabaseManager;
-import org.telegram.telegrambots.TelegramApiException;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.User;
 import org.telegram.telegrambots.bots.AbsSender;
 import org.telegram.telegrambots.bots.commands.BotCommand;
 import org.telegram.telegrambots.bots.commands.ICommandRegistry;
+import org.telegram.telegrambots.exceptions.TelegramApiException;
 import org.telegram.telegrambots.logging.BotLogger;
 
-/**
- * This command helps the user to find the command they need
- *
- * @author Timo Schulz (Mit0x2)
- */
 public class HelpCommand extends BotCommand {
 
     private static final String LOGTAG = "HELPCOMMAND";
@@ -28,25 +22,19 @@ public class HelpCommand extends BotCommand {
 
     @Override
     public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
+        StringBuilder helpMessageBuilder = new StringBuilder("Try:\n\n");
 
-        if (!DatabaseManager.getInstance().getUserStateForCommandsBot(user.getId())) {
-            return;
+        for (BotCommand c : commandRegistry.getRegisteredCommands()) {
+            helpMessageBuilder.append("/" + c.getCommandIdentifier() + " " + c.getDescription()).append("\n");
         }
 
-        StringBuilder helpMessageBuilder = new StringBuilder("<b>Help</b>\n");
-        helpMessageBuilder.append("These are the registered commands for this Bot:\n\n");
-
-        for (BotCommand botCommand : commandRegistry.getRegisteredCommands()) {
-            helpMessageBuilder.append(botCommand.toString()).append("\n\n");
-        }
-
-        SendMessage helpMessage = new SendMessage();
-        helpMessage.setChatId(chat.getId().toString());
-        helpMessage.enableHtml(true);
-        helpMessage.setText(helpMessageBuilder.toString());
+        SendMessage m = new SendMessage();
+        m.setChatId(chat.getId().toString());
+        m.enableMarkdown(true);
+        m.setText(helpMessageBuilder.toString());
 
         try {
-            absSender.sendMessage(helpMessage);
+            absSender.sendMessage(m);
         } catch (TelegramApiException e) {
             BotLogger.error(LOGTAG, e);
         }

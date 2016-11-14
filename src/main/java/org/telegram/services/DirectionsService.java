@@ -16,7 +16,6 @@ import org.telegram.telegrambots.logging.BotLogger;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,14 +31,14 @@ public class DirectionsService {
     private static final String BASEURL = "https://maps.googleapis.com/maps/api/directions/json"; ///< Base url for REST
     private static final String APIIDEND = "&key=" + BuildVars.DirectionsApiKey;
     private static final String PARAMS = "&language=@language@&units=metric";
-    private static final DateTimeFormatter dateFormaterFromDate = DateTimeFormatter.ofPattern("dd/MM/yyyy"); ///< Date to text formater
+    private static final LocalizationService LOCALIZATION = new LocalizationService();
+
     private static volatile DirectionsService instance; ///< Instance of this class
 
     /**
      * Constructor (private due to singleton pattern)
      */
-    private DirectionsService() {
-    }
+    private DirectionsService() {}
 
     /**
      * Singleton
@@ -84,7 +83,7 @@ public class DirectionsService {
             JSONObject jsonObject = new JSONObject(responseContent);
             if (jsonObject.getString("status").equals("OK")) {
                 JSONObject route = jsonObject.getJSONArray("routes").getJSONObject(0);
-                String startOfAddress = LocalisationService.getInstance().getString("directionsInit", language);
+                String startOfAddress = LOCALIZATION.getString("directionsInit", language);
                 String partialResponseToUser = String.format(startOfAddress,
                         route.getJSONArray("legs").getJSONObject(0).getString("start_address"),
                         route.getJSONArray("legs").getJSONObject(0).getJSONObject("distance").getString("text"),
@@ -95,11 +94,11 @@ public class DirectionsService {
                 responseToUser.addAll(getDirectionsSteps(
                         route.getJSONArray("legs").getJSONObject(0).getJSONArray("steps"), language));
             } else {
-                responseToUser.add(LocalisationService.getInstance().getString("directionsNotFound", language));
+                responseToUser.add(LOCALIZATION.getString("directionsNotFound", language));
             }
         } catch (Exception e) {
             BotLogger.warn(LOGTAG, e);
-            responseToUser.add(LocalisationService.getInstance().getString("errorFetchingDirections", language));
+            responseToUser.add(LOCALIZATION.getString("errorFetchingDirections", language));
         }
         return responseToUser;
     }
@@ -126,7 +125,7 @@ public class DirectionsService {
     }
 
     private String getDirectionForStep(JSONObject jsonObject, String language) {
-        String direction = LocalisationService.getInstance().getString("directionsStep", language);
+        String direction = LOCALIZATION.getString("directionsStep", language);
         String htmlIntructions = Jsoup.parse(jsonObject.getString("html_instructions")).text();
         String duration = jsonObject.getJSONObject("duration").getString("text");
         String distance = jsonObject.getJSONObject("distance").getString("text");

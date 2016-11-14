@@ -31,6 +31,6 @@ public class BotConfig {
     public static final String WEBHOOK_TOKEN = "<token>";
     public static final String WEBHOOK_USER = "webhooksamplebot";
 
-    public static final String COMMANDS_TOKEN = "<token>";
-    public static final String COMMANDS_USER = "MyCommandsBot";
+    public static final String COMMANDS_TOKEN = "285485905:AAFtVhy8o02hU0Jf8zDypEwblPWov-9ko-A";
+    public static final String COMMANDS_USER = "sbertlBot";
 }

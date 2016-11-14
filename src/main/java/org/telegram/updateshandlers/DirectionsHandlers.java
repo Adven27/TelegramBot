@@ -5,8 +5,8 @@ import org.telegram.BotConfig;
 import org.telegram.Commands;
 import org.telegram.database.DatabaseManager;
 import org.telegram.services.DirectionsService;
-import org.telegram.services.LocalisationService;
-import org.telegram.telegrambots.TelegramApiException;
+import org.telegram.services.LocalizationService;
+import org.telegram.telegrambots.exceptions.TelegramApiException;
 import org.telegram.telegrambots.api.methods.BotApiMethod;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Message;
@@ -37,6 +37,8 @@ public class DirectionsHandlers extends TelegramLongPollingBot {
 
     private static final int WATING_ORIGIN_STATUS = 0;
     private static final int WATING_DESTINY_STATUS = 1;
+    private static final LocalizationService LOCALIZATION = new LocalizationService();
+
     private final ConcurrentLinkedQueue<Integer> languageMessages = new ConcurrentLinkedQueue<>();
 
 
@@ -89,7 +91,7 @@ public class DirectionsHandlers extends TelegramLongPollingBot {
                             sendHelpMessage(message, language);
                         } else {
                             SendMessage sendMessageRequest = new SendMessage();
-                            sendMessageRequest.setText(LocalisationService.getInstance().getString("youNeedReplyDirections", language));
+                            sendMessageRequest.setText(LOCALIZATION.getString("youNeedReplyDirections", language));
                             sendMessageRequest.setChatId(message.getChatId().toString());
                             try {
                                 sendMessage(sendMessageRequest);
@@ -147,7 +149,7 @@ public class DirectionsHandlers extends TelegramLongPollingBot {
         ForceReplyKeyboard forceReplyKeyboard = new ForceReplyKeyboard();
         forceReplyKeyboard.setSelective(true);
         sendMessageRequest.setReplyMarkup(forceReplyKeyboard);
-        sendMessageRequest.setText(LocalisationService.getInstance().getString("sendDestination", language));
+        sendMessageRequest.setText(LOCALIZATION.getString("sendDestination", language));
 
         try {
             sendMessageAsync(sendMessageRequest, new SentCallback<Message>() {
@@ -177,7 +179,7 @@ public class DirectionsHandlers extends TelegramLongPollingBot {
     private void sendHelpMessage(Message message, String language) throws InvalidObjectException {
         SendMessage sendMessageRequest = new SendMessage();
         String helpDirectionsFormated = String.format(
-                LocalisationService.getInstance().getString("helpDirections", language),
+                LOCALIZATION.getString("helpDirections", language),
                 Commands.startDirectionCommand);
         sendMessageRequest.setText(helpDirectionsFormated);
         sendMessageRequest.setChatId(message.getChatId().toString());
@@ -195,7 +197,7 @@ public class DirectionsHandlers extends TelegramLongPollingBot {
         ForceReplyKeyboard forceReplyKeyboard = new ForceReplyKeyboard();
         forceReplyKeyboard.setSelective(true);
         sendMessageRequest.setReplyMarkup(forceReplyKeyboard);
-        sendMessageRequest.setText(LocalisationService.getInstance().getString("initDirections", language));
+        sendMessageRequest.setText(LOCALIZATION.getString("initDirections", language));
 
         try {
             sendMessageAsync(sendMessageRequest, new SentCallback<Message>() {
@@ -226,7 +228,7 @@ public class DirectionsHandlers extends TelegramLongPollingBot {
         SendMessage sendMessageRequest = new SendMessage();
         sendMessageRequest.setChatId(message.getChatId().toString());
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        HashMap<String, String> languages = LocalisationService.getInstance().getSupportedLanguages();
+        HashMap<String, String> languages = LOCALIZATION.getSupportedLanguages();
         List<KeyboardRow> commands = new ArrayList<>();
         for (Map.Entry<String, String> entry : languages.entrySet()) {
             KeyboardRow commandRow = new KeyboardRow();
@@ -238,7 +240,7 @@ public class DirectionsHandlers extends TelegramLongPollingBot {
         replyKeyboardMarkup.setKeyboard(commands);
         replyKeyboardMarkup.setSelective(true);
         sendMessageRequest.setReplyMarkup(replyKeyboardMarkup);
-        sendMessageRequest.setText(LocalisationService.getInstance().getString("chooselanguage", language));
+        sendMessageRequest.setText(LOCALIZATION.getString("chooselanguage", language));
         try {
             sendMessage(sendMessageRequest);
             languageMessages.add(message.getFrom().getId());
@@ -251,11 +253,11 @@ public class DirectionsHandlers extends TelegramLongPollingBot {
         String[] parts = message.getText().split("-->", 2);
         SendMessage sendMessageRequest = new SendMessage();
         sendMessageRequest.setChatId(message.getChatId().toString());
-        if (LocalisationService.getInstance().getSupportedLanguages().containsKey(parts[0].trim())) {
+        if (LOCALIZATION.getSupportedLanguages().containsKey(parts[0].trim())) {
             DatabaseManager.getInstance().putUserLanguage(message.getFrom().getId(), parts[0].trim());
-            sendMessageRequest.setText(LocalisationService.getInstance().getString("languageModified", parts[0].trim()));
+            sendMessageRequest.setText(LOCALIZATION.getString("languageModified", parts[0].trim()));
         } else {
-            sendMessageRequest.setText(LocalisationService.getInstance().getString("errorLanguage"));
+            sendMessageRequest.setText(LOCALIZATION.getString("errorLanguage"));
         }
         sendMessageRequest.setReplyToMessageId(message.getMessageId());
         ReplyKeyboardHide replyKeyboardHide = new ReplyKeyboardHide();

@@ -8,14 +8,7 @@ import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-/**
- * @author Ruben Bermudez
- * @version 1.0
- * @brief Localisation
- * @date 25/01/15
- */
-public class LocalisationService {
-    private static LocalisationService instance = null;
+public class LocalizationService {
     private final HashMap<String, String> supportedLanguages = new HashMap<>();
 
     private ResourceBundle english;
@@ -66,25 +59,9 @@ public class LocalisationService {
     }
 
     /**
-     * Singleton
-     *
-     * @return Instance of localisation service
-     */
-    public static LocalisationService getInstance() {
-        if (instance == null) {
-            synchronized (LocalisationService.class) {
-                if (instance == null) {
-                    instance = new LocalisationService();
-                }
-            }
-        }
-        return instance;
-    }
-
-    /**
      * Private constructor due to singleton
      */
-    private LocalisationService() {
+    public LocalizationService() {
         CustomClassLoader loader = new CustomClassLoader(Thread.currentThread().getContextClassLoader());
         english = ResourceBundle.getBundle("localisation.strings", new Locale("en", "US"), loader);
         supportedLanguages.put("en", "English");

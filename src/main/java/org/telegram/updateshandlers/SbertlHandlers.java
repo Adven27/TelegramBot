@@ -5,9 +5,6 @@ import org.telegram.mamot.services.BardakMenu;
 import org.telegram.mamot.services.DAO;
 import org.telegram.mamot.services.Mamorator;
 import org.telegram.services.*;
-import org.telegram.services.impl.JokePrinter;
-import org.telegram.services.impl.QuoteService;
-import org.telegram.telegrambots.TelegramApiException;
 import org.telegram.telegrambots.api.methods.AnswerInlineQuery;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.methods.send.SendSticker;
@@ -20,15 +17,13 @@ import org.telegram.telegrambots.api.objects.inlinequery.inputmessagecontent.Inp
 import org.telegram.telegrambots.api.objects.inlinequery.result.InlineQueryResult;
 import org.telegram.telegrambots.api.objects.inlinequery.result.InlineQueryResultArticle;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.exceptions.TelegramApiException;
 import org.telegram.telegrambots.logging.BotLogger;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import static java.time.LocalDateTime.now;
-import static org.telegram.services.Stickers.LOL;
-import static org.telegram.services.Stickers.THINK;
 
 public class SbertlHandlers extends TelegramLongPollingBot {
 
@@ -44,20 +39,16 @@ quote - some random stuff from noosphere...
 
     public static final String CHAT_ID = "-145229307";
     public static final DAO DAO = new DAO();
-    public static final String SUP = "/sup";
     public static final String BARDAK = "/bardak";
-    public static final String WHO = "/who";
 
     private Mamorator mamorator;
     private BardakMenu bardakMenu;
-    protected WeatherService weatherService;
-    protected QuoteService quoteService;
-    private JokePrinter jokePrinter;
+    protected Weather weather;
+    private final AnswerMessage[] answers;
 
-    public SbertlHandlers(WeatherService weatherService, QuoteService quoteService, JokePrinter jokePrinter) {
-        this.weatherService = weatherService;
-        this.quoteService = quoteService;
-        this.jokePrinter = jokePrinter;
+    public SbertlHandlers(Weather weather, AnswerMessage... answers) {
+        this.weather = weather;
+        this.answers = answers;
         mamorator = new Mamorator(DAO);
         bardakMenu = new BardakMenu(DAO);
     }
@@ -81,22 +72,17 @@ quote - some random stuff from noosphere...
                         if (e.getType().equals("url")) {
                             sendText(chatId, "Link " + e.getText());
                         } else if (e.getType().equals("bot_command")) {
-                            String text = e.getText();
-                            if (text.contains("/stickers")) {
+                            String cmd = e.getText();
+                            for (AnswerMessage am : answers) {
+                                if (am.is(cmd)) {
+                                    am.answer(msg, this);
+                                }
+                            }
+                            if (cmd.contains("/stickers")) {
                                 showAllStickers(chatId);
-                            } else if (text.startsWith(SUP)) {
-                                sup(chatId);
-                            } else if (text.startsWith(BARDAK)) {
+                            } else if (cmd.equals(BARDAK)) {
                                 sendText(chatId, bardakMenu.menu(now()));
-                            } else if (text.startsWith("/weather")) {
-                                weather(msg);
-                            } else if (text.startsWith("/quote")) {
-                                quote(msg);
-                            } else if (text.startsWith("/ha")) {
-                                ha(msg);
-                            } else if (text.startsWith(WHO)) {
-                                who(chatId, text);
-                            } else if (text.startsWith("/die")) {
+                            } else if (cmd.startsWith("/die")) {
                                 TimerExecutor.getInstance().stop();
                                 System.exit(0);
                             }
@@ -109,49 +95,6 @@ quote - some random stuff from noosphere...
         } else if (update.hasInlineQuery()) {
             handleIncomingInlineQuery(update.getInlineQuery());
         }
-    }
-
-    private void weather(Message msg) throws TelegramApiException {
-        String weather = weatherService.fetchWeatherCurrentByLocation(
-                39.888599, 59.2187,
-                "ru", "metric");
-        SendMessage send = new SendMessage();
-        send.enableMarkdown(true);
-        send.setReplyToMessageId(msg.getMessageId());
-        send.setText(weather);
-        send.setChatId(msg.getChatId().toString());
-        sendMessage(send);
-    }
-
-    private void quote(Message msg) throws TelegramApiException {
-        SendSticker sticker = new SendSticker();
-        sticker.setChatId(msg.getChatId().toString());
-        sticker.setReplyToMessageId(msg.getMessageId());
-        sticker.setSticker(THINK.getId());
-        sendSticker(sticker);
-
-        String quote = quoteService.fetchQuote();
-        SendMessage send = new SendMessage();
-        send.disableWebPagePreview();
-        send.setText(quote);
-        send.setChatId(msg.getChatId().toString());
-        sendMessage(send);
-    }
-
-    private void ha(Message msg) throws TelegramApiException {
-        SendSticker sticker = new SendSticker();
-        sticker.setChatId(msg.getChatId().toString());
-        sticker.setReplyToMessageId(msg.getMessageId());
-        sticker.setSticker(LOL.getId());
-        sendSticker(sticker);
-
-        String txt = jokePrinter.print();
-        SendMessage send = new SendMessage();
-        send.disableWebPagePreview();
-        send.enableHtml(true);
-        send.setText(txt);
-        send.setChatId(msg.getChatId().toString());
-        sendMessage(send);
     }
 
     private void handleIncomingInlineQuery(InlineQuery inlineQuery) {
@@ -203,22 +146,6 @@ quote - some random stuff from noosphere...
 
     private void stickerHash(String chatId, String recievedStickerFileId) throws TelegramApiException {
         sendText(chatId, recievedStickerFileId);
-    }
-
-    private void who(String chatId, String text) throws TelegramApiException {
-        int beginIndex = text.indexOf(" ");
-        if (beginIndex == -1) {
-            sendText(chatId , "а кто есть?");
-        } else {
-            String vars = text.substring(beginIndex).trim();
-            String[] names = vars.split(" ");
-            sendText(chatId, names[new Random().nextInt(names.length)]);
-        }
-    }
-
-    private void sup(String chatId) throws TelegramApiException {
-        sendSticker(chatId, Stickers.values()[new Random().nextInt(Stickers.values().length)]);
-        sendText(chatId, DAO.getComplement());
     }
 
     protected void sendSticker(String chatId, Stickers s) throws TelegramApiException {

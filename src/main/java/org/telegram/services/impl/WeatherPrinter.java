@@ -3,7 +3,7 @@ package org.telegram.services.impl;
 import org.json.JSONObject;
 import org.telegram.mamot.services.DAO;
 import org.telegram.services.Emoji;
-import org.telegram.services.LocalisationService;
+import org.telegram.services.LocalizationService;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -16,10 +16,10 @@ import static org.telegram.services.Emoji.*;
 
 public class WeatherPrinter {
 
-    private LocalisationService localisation;
+    private LocalizationService localisation;
     private DAO dao;
 
-    public WeatherPrinter(LocalisationService localisation, DAO dao) {
+    public WeatherPrinter(LocalizationService localisation, DAO dao) {
         this.localisation = localisation;
         this.dao = dao;
     }
