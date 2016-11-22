@@ -1,17 +1,14 @@
 package org.telegram.commands;
 
-import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.User;
 import org.telegram.telegrambots.bots.AbsSender;
 import org.telegram.telegrambots.bots.commands.BotCommand;
 import org.telegram.telegrambots.bots.commands.ICommandRegistry;
-import org.telegram.telegrambots.exceptions.TelegramApiException;
-import org.telegram.telegrambots.logging.BotLogger;
+
+import static org.telegram.services.Stickers.HELP;
 
 public class HelpCommand extends BotCommand {
-
-    private static final String LOGTAG = "HELPCOMMAND";
 
     private final ICommandRegistry commandRegistry;
 
@@ -21,22 +18,19 @@ public class HelpCommand extends BotCommand {
     }
 
     @Override
-    public void execute(AbsSender absSender, User user, Chat chat, String[] strings) {
-        StringBuilder helpMessageBuilder = new StringBuilder("Try:\n\n");
-
-        for (BotCommand c : commandRegistry.getRegisteredCommands()) {
-            helpMessageBuilder.append("/" + c.getCommandIdentifier() + " " + c.getDescription()).append("\n");
-        }
-
-        SendMessage m = new SendMessage();
-        m.setChatId(chat.getId().toString());
-        m.enableMarkdown(true);
-        m.setText(helpMessageBuilder.toString());
-
-        try {
-            absSender.sendMessage(m);
-        } catch (TelegramApiException e) {
-            BotLogger.error(LOGTAG, e);
-        }
+    public void execute(AbsSender sender, User user, Chat chat, String[] strings) {
+        new Answer(sender).to(chat)
+                .sticker(HELP)
+                .message(getHelpMsg()).enableMarkdown()
+                .send();
     }
+
+    private String getHelpMsg() {
+        StringBuilder msg = new StringBuilder("");
+        for (BotCommand c : commandRegistry.getRegisteredCommands()) {
+            msg.append("/" + c.getCommandIdentifier() + " " + c.getDescription()).append("\n");
+        }
+        return msg.toString();
+    }
+
 }

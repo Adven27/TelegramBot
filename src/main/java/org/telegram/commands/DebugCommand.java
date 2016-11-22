@@ -1,26 +1,22 @@
 package org.telegram.commands;
 
-import org.telegram.mamot.services.BardakMenu;
-import org.telegram.mamot.services.DAO;
+import org.telegram.services.TimerExecutor;
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.User;
 import org.telegram.telegrambots.bots.AbsSender;
 import org.telegram.telegrambots.bots.commands.BotCommand;
 
-import static java.time.LocalDateTime.now;
+public class DebugCommand extends BotCommand {
 
-public class BardakCommand extends BotCommand {
-
-    private final org.telegram.mamot.services.DAO DAO;
-
-    public BardakCommand(DAO dao) {
-        super("bardak","Bardak menu");
-        DAO = dao;
+    public DebugCommand() {
+        super("debug","some tech shit");
     }
 
     @Override
     public void execute(AbsSender sender, User user, Chat chat, String[] strings) {
-        String msg = new BardakMenu(DAO).menu(now());
+        String msg = chat.toString() + "\n" + user.toString() + "\n" + TimerExecutor.getInstance().toString();
+
+
         new Answer(sender).to(chat)
                 .message(msg).disableWebPagePreview()
                 .send();

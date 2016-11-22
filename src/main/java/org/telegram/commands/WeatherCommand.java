@@ -1,12 +1,10 @@
 package org.telegram.commands;
 
 import org.telegram.services.Weather;
-import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.User;
 import org.telegram.telegrambots.bots.AbsSender;
 import org.telegram.telegrambots.bots.commands.BotCommand;
-import org.telegram.telegrambots.exceptions.TelegramApiException;
 import org.telegram.telegrambots.logging.BotLogger;
 
 public class WeatherCommand extends BotCommand {
@@ -20,16 +18,9 @@ public class WeatherCommand extends BotCommand {
     }
     @Override
     public void execute(AbsSender sender, User user, Chat chat, String[] strings) {
-        try {
-            SendMessage m = new SendMessage();
-            m.disableWebPagePreview();
-            m.enableMarkdown(true);
-            m.setText(print());
-            m.setChatId(chat.getId().toString());
-            sender.sendMessage(m);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
+        new Answer(sender).to(chat)
+            .message(print()).disableWebPagePreview().enableMarkdown()
+            .send();
     }
 
     public String print() {

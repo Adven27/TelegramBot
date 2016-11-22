@@ -9,18 +9,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static java.time.LocalDateTime.now;
-import static java.util.concurrent.TimeUnit.DAYS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-/**
- * @author Ruben Bermudez
- * @version 2.0
- * @brief Exectue a task periodically
- * @date 27/01/25
- */
 public class TimerExecutor {
     private static final String LOGTAG = "TIMEREXECUTOR";
-    private static volatile TimerExecutor instance; ///< Instance
+    private static volatile TimerExecutor instance;
     private static final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1); ///< Thread to execute operations
 
     /**
@@ -59,45 +52,42 @@ public class TimerExecutor {
      * @param targetSec  Second to execute it
      */
     public void startExecutionEveryDayAt(CustomTimerTask task, int targetHour, int targetMin, int targetSec) {
-        BotLogger.warn(LOGTAG, "Posting new task " + task.getTaskName());
+        BotLogger.warn(LOGTAG, "Posting new task " + task.getTaskName() + " " + executorService.toString());
         final Runnable taskWrapper = () -> {
             try {
                 task.execute();
                 task.reduceTimes();
                 startExecutionEveryDayAt(task, targetHour, targetMin, targetSec);
+                BotLogger.info(LOGTAG, "execute " + executorService.toString());
             } catch (Exception e) {
                 BotLogger.severe(LOGTAG, "Bot threw an unexpected exception at TimerExecutor", e);
             }
         };
         if (task.getTimes() != 0) {
             executorService.schedule(taskWrapper, computeNextDelay(targetHour, targetMin, targetSec), SECONDS);
+            BotLogger.warn(LOGTAG, "Schedule at " + targetHour + ":" + targetMin + ":" + targetSec + " " + task.getTaskName() + " " + executorService.toString());
         }
     }
 
     public void startExecutionOnRandomHourAt(CustomTimerTask task, int targetHour, int targetMin, int targetSec) {
-        BotLogger.warn(LOGTAG, "Posting new task " + task.getTaskName());
+        BotLogger.warn(LOGTAG, "Posting new task " + task.getTaskName() + " " + executorService.toString());
         final Runnable taskWrapper = () -> {
             try {
                 task.execute();
                 task.reduceTimes();
                 startExecutionOnRandomHourAt(task, new Random().nextInt(12) + 9 , new Random().nextInt(59), 0);
+                BotLogger.info(LOGTAG, "execute " + executorService.toString());
             } catch (Exception e) {
                 BotLogger.severe(LOGTAG, "Bot threw an unexpected exception at TimerExecutor", e);
             }
         };
         if (task.getTimes() != 0) {
-            executorService.schedule(taskWrapper, computeNextHour(targetHour, targetMin, targetSec), SECONDS);
+            long nextHour = computeNextHour(targetHour, targetMin, targetSec);
+            executorService.schedule(taskWrapper, nextHour, SECONDS);
+            BotLogger.warn(LOGTAG, "Schedule at " + targetHour + ":" + targetMin + ":" + targetSec + " " + task.getTaskName() + " " + executorService.toString());
         }
     }
 
-    /**
-     * Find out next daily execution
-     *
-     * @param targetHour Target hour
-     * @param targetMin  Target minute
-     * @param targetSec  Target second
-     * @return time in second to wait
-     */
     private long computeNextDelay(int targetHour, int targetMin, int targetSec) {
         final LocalDateTime now = now();
         LocalDateTime nextTime = now.withHour(targetHour).withMinute(targetMin).withSecond(targetSec);
@@ -121,17 +111,12 @@ public class TimerExecutor {
         this.stop();
     }
 
-    /**
-     * Stop the thread
-     */
     public void stop() {
-        executorService.shutdown();
-        try {
-            executorService.awaitTermination(1, DAYS);
-        } catch (InterruptedException ex) {
-            BotLogger.severe(LOGTAG, ex);
-        } catch (Exception e) {
-            BotLogger.severe(LOGTAG, "Bot threw an unexpected exception at TimerExecutor", e);
-        }
+        BotLogger.warn(LOGTAG, "Rejected tasks: " + executorService.shutdownNow().size());
+    }
+
+    @Override
+    public String toString() {
+        return executorService.toString();
     }
 }

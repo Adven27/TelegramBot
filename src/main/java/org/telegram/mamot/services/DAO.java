@@ -1,8 +1,16 @@
 package org.telegram.mamot.services;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
+import static java.util.stream.Collectors.toList;
+
 public class DAO {
+
+    public static final String QUOTES_FILE = "quotes/quotes";
 
     public String getEndWord(int index) {
         return endWords().get(index % endWords().size());
@@ -27,6 +35,27 @@ public class DAO {
         words.put(6, "с 3 часов ночи скидка на все алкогольные коктейли 30%");
         words.put(7, "30% на все гор€чие блюда и 2 коктейл€ по цене одного");
         return words;
+    }
+
+    private List<String> getQuotes() {
+        List<String> list = new ArrayList<>();
+
+        String path = getClass().getClassLoader().getResource(QUOTES_FILE).getPath().substring(1);
+        try (BufferedReader br = Files.newBufferedReader(Paths.get(path))) {
+           list = br.lines().collect(toList());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public String getQuote() {
+        int i = new Random().nextInt(200) + 1;
+        List<String> quotes = getQuotes();
+
+        int qi = i % 2 == 0 ? i - 2 : i - 1;
+        int ai = qi + 1;
+        return quotes.get(qi) + "\n\n" + quotes.get(ai);
     }
 
     public String getComplement() {
