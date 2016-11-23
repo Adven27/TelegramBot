@@ -1,5 +1,6 @@
 package org.telegram.updateshandlers;
 
+import jersey.repackaged.com.google.common.collect.Lists;
 import org.telegram.commands.Answer;
 import org.telegram.commands.GameCommand;
 import org.telegram.commands.HelpCommand;
@@ -9,12 +10,15 @@ import org.telegram.services.CustomTimerTask;
 import org.telegram.services.Emoji;
 import org.telegram.services.Events;
 import org.telegram.services.TimerExecutor;
+import org.telegram.sokoban.model.Direction;
 import org.telegram.telegrambots.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.api.objects.*;
 import org.telegram.telegrambots.bots.TelegramLongPollingCommandBot;
 import org.telegram.telegrambots.bots.commands.BotCommand;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
+import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
+import org.telegram.telegrambots.logging.BotLogger;
 
 import java.util.List;
 import java.util.Map;
@@ -24,6 +28,7 @@ import static org.telegram.BotConfig.COMMANDS_USER;
 import static org.telegram.commands.PollCommand.getInlineKeyboard;
 import static org.telegram.commands.PollCommand.polls;
 import static org.telegram.services.Stickers.THINK;
+import static org.telegram.sokoban.model.Direction.*;
 
 public class CommandsHandler extends TelegramLongPollingCommandBot {
 
@@ -93,31 +98,96 @@ public class CommandsHandler extends TelegramLongPollingCommandBot {
             if (cb.getData().indexOf("#") == -1) {
                 try {
                     Message message = cb.getMessage();
+                    if (GameCommand.controller == null) {
+                        removeInlineKeyboard(message);
+                        return;
+                    }
                     String data = cb.getData();
+
+                    String from = cb.getFrom().getLastName() + " " + cb.getFrom().getFirstName();
+                    switch (data) {
+                        case "left":
+                            GameCommand.move(LEFT);
+                            stat(from, LEFT);
+                            break;
+                        case "left_turbo":
+                            GameCommand.turboMove(LEFT);
+                            stat(from, LEFT);
+                            break;
+                        case "right":
+                            GameCommand.move(RIGHT);
+                            stat(from, RIGHT);
+                            break;
+                        case "right_turbo":
+                            GameCommand.turboMove(RIGHT);
+                            stat(from, RIGHT);
+                            break;
+                        case "up":
+                            GameCommand.move(UP);
+                            stat(from, UP);
+                            break;
+                        case "up_turbo":
+                            GameCommand.turboMove(UP);
+                            stat(from, UP);
+                            break;
+                        case "down":
+                            GameCommand.move(DOWN);
+                            stat(from, DOWN);
+                            break;
+                        case "down_turbo":
+                            GameCommand.turboMove(DOWN);
+                            stat(from, DOWN);
+                            break;
+                        case "right_down":
+                            GameCommand.moveRightAnd(DOWN);
+                            stat(from, DOWN);
+                            break;
+                        case "right_up":
+                            GameCommand.moveRightAnd(UP);
+                            stat(from, UP);
+                            break;
+                        case "restart":
+                            GameCommand.restart();
+                            break;
+                    }
+
+                    String screen = GameCommand.screen();
+                    String stat = "";
+                    for (Map.Entry<String, List<Direction>> playerTurns : GameCommand.turns.entrySet()) {
+                        stat += playerTurns.getKey() + " : " + playerTurns.getValue().size() + "\n";
+                    }
+                    EditMessageText newTxt = new EditMessageText();
+                    newTxt.setMessageId(message.getMessageId());
+                    newTxt.setReplyMarkup(GameCommand.getInlineKeyboard());
+                    newTxt.setText(stat + screen);
+                    newTxt.setChatId(message.getChatId().toString());
+                    editMessageText(newTxt);
+
                     AnswerCallbackQuery acb = new AnswerCallbackQuery();
                     acb.setText(data);
                     acb.setCallbackQueryId(cb.getId());
                     answerCallbackQuery(acb);
-                    if ("up".equals(data)) {
-                        GameCommand.up();
-                    } else {
-                        GameCommand.down();
+                } catch (TelegramApiRequestException e) {
+                    if (e.getErrorCode().equals(429)) {
+                        AnswerCallbackQuery acb = new AnswerCallbackQuery();
+                        acb.setText("„от приуныл...\n" + e.getApiResponse());
+                        acb.setCallbackQueryId(cb.getId());
+                        try {
+                            answerCallbackQuery(acb);
+                        } catch (TelegramApiException e1) {
+                            BotLogger.error(LOGTAG, e1);
+                        }
+                        GameCommand.stepsInRow = 0;
                     }
-
-                    EditMessageText newTxt = new EditMessageText();
-                    newTxt.setMessageId(message.getMessageId());
-                    newTxt.setReplyMarkup(GameCommand.getInlineKeyboard());
-                    newTxt.setText(GameCommand.screen());
-                    newTxt.setChatId(message.getChatId().toString());
-                    editMessageText(newTxt);
+                    BotLogger.error(LOGTAG, e);
                 } catch (TelegramApiException e) {
-                    e.printStackTrace();
+                    BotLogger.error(LOGTAG, e);
                 }
 
             } else {
                 String[] answer = cb.getData().split("#");
                 String pollId = answer[0];
-                String choosen = answer[1];
+                String chosen = answer[1];
                 Map<String, List<String>> poll = polls.get(pollId);
                 Message message = cb.getMessage();
 
@@ -129,7 +199,7 @@ public class CommandsHandler extends TelegramLongPollingCommandBot {
                 for (String v : poll.keySet()) {
                     List<String> votes = poll.get(v);
                     String voter = cb.getFrom().getLastName() + " " + cb.getFrom().getFirstName();
-                    if (choosen.equals(v)) {
+                    if (chosen.equals(v)) {
                         if (!votes.contains(voter)) {
                             votes.add(voter);
                         }
@@ -165,6 +235,17 @@ public class CommandsHandler extends TelegramLongPollingCommandBot {
                 }
             }
         }
+    }
+
+    private void stat(String from, Direction direction) {
+        List<Direction> directions;
+        directions = GameCommand.turns.get(from);
+        if (directions == null) {
+            directions = Lists.newArrayList(direction);
+        } else {
+            directions.add(direction);
+        }
+        GameCommand.turns.put(from, directions);
     }
 
     private void removeInlineKeyboard(Message message) {

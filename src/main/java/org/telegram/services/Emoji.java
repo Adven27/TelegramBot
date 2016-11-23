@@ -142,6 +142,14 @@ public enum Emoji {
     SUN_WITH_FACE('\uD83C', '\uDF1E'),
     FOGGY('\uD83C', '\uDF01'),
     CLOUD(null, '\u2601'),
+    RIGHT_ARROW(null, '\u25B6'),
+    RIGHT_DOUBLE_ARROW(null, '\u23E9'),
+    LEFT_ARROW(null, '\u25C0'),
+    LEFT_DOUBLE_ARROW(null, '\u23EA'),
+    UP_DOUBLE_ARROW(null, '\u23EB'),
+    DOWN_DOUBLE_ARROW(null, '\u23EC'),
+    RIGHT_UP_ARROW(null, '\u2934'),
+    RIGHT_DOWN_ARROW(null, '\u2935'),
 
     // Others
     LEFT_RIGHT_ARROW(null, '\u2194'),
