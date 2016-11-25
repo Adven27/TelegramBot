@@ -25,26 +25,29 @@ public class LevelLoader {
         Set<Box> boxes = new HashSet<>();
         Set<Home> homes = new HashSet<>();
         Player player = null;
+        int x = 0;
+        int y = 0;
 
         int actualLevel = (level == 60 ? 60 : level % 60);
         try {
             InputStream in = getClass().getResourceAsStream(levels);
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
 
-            while (bufferedReader.ready()) {
-                if (bufferedReader.readLine().equals("Maze: " + actualLevel)) {
-                    bufferedReader.readLine();
-                    int x = Integer.parseInt(bufferedReader.readLine().split(" ")[2]);
-                    int y = Integer.parseInt(bufferedReader.readLine().split(" ")[2]);
-                    bufferedReader.readLine();
-                    bufferedReader.readLine();
-                    bufferedReader.readLine();
+            while (br.ready()) {
+                String curLine = br.readLine();
+                if (curLine.equals("Maze: " + actualLevel)) {
+                    br.readLine();
+                    x = Integer.parseInt(br.readLine().split(" ")[2]);
+                    y = Integer.parseInt(br.readLine().split(" ")[2]);
+                    br.readLine();
+                    br.readLine();
+                    br.readLine();
 
                     int x0 = 0;
                     int y0 = 0;
 
                     for (int i = 0; i < y; i++) {
-                        String line = bufferedReader.readLine();
+                        String line = br.readLine();
                         for (int j = 0; j < x; j++) {
                             char ch = line.charAt(j);
                             switch (ch) {
@@ -71,12 +74,12 @@ public class LevelLoader {
                     }
                 }
             }
-            bufferedReader.close();
+            br.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return new GameObjects(walls, boxes, homes, player);
+        return new GameObjects(walls, boxes, homes, player, x, y);
 
     }
 }

@@ -130,10 +130,11 @@ public class GameCommand extends BotCommand {
 
     public static String screen() {
         Map<Point, GameObject> gameField = controller.getGameField();
+        GameObjects gameObjects = controller.getGameObjects();
 
         String msg = "";
-        for (int y = 0; y < 10; y++) {
-            for (int x = 0; x < 14; x++) {
+        for (int y = 0; y < gameObjects.getH(); y++) {
+            for (int x = 0; x < gameObjects.getW(); x++) {
                 GameObject gameObject = gameField.get(new Point(x, y));
                 if (gameObject == null) {
                     msg += EMPTY_CELL;

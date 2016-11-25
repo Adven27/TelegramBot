@@ -1,5 +1,7 @@
 package org.telegram.sokoban.model;
 
+import org.telegram.sokoban.view.Point;
+
 import java.util.Map;
 
 /**
@@ -10,7 +12,9 @@ public class Home extends GameObject {
         super(x, y, 1, 1);
     }
 
-    public void draw(Map<org.telegram.sokoban.view.Point, GameObject> graphics) {
-        graphics.put(new org.telegram.sokoban.view.Point(getX(), getY()), this);
+    public void draw(Map<Point, GameObject> gameField) {
+        if (gameField.get(new Point(getX(), getY())) == null) {
+            gameField.put(new Point(getX(), getY()), this);
+        }
     }
 }
