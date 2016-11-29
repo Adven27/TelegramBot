@@ -4,6 +4,7 @@ import org.telegram.telegrambots.logging.BotLogger;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -100,7 +101,7 @@ public class TimerExecutor {
     private long computeNextHour(int targetHour, int targetMin, int targetSec) {
         final LocalDateTime now = now();
         LocalDateTime nextTime = now.withHour(targetHour).withMinute(targetMin).withSecond(targetSec);
-        while (now.compareTo(nextTime) > 0 && nextTime.getHour() > 8 && nextTime.getHour() < 22) {
+        while (now.compareTo(nextTime) > 0 && ChronoUnit.HOURS.between(now, nextTime) < 1 && nextTime.getHour() > 8 && nextTime.getHour() < 22) {
             nextTime = nextTime.plusHours(new Random().nextInt(3) + 1);
         }
         return Duration.between(now, nextTime).getSeconds();

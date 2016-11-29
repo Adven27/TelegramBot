@@ -1,4 +1,4 @@
-package org.telegram.commands;
+package org.telegram.fluent;
 
 import org.telegram.services.Stickers;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
@@ -63,31 +63,39 @@ public class Answer {
     public void send() {
         try {
             if (sticker != null) {
-                SendSticker st = new SendSticker();
-                st.setChatId(chat);
-                st.setSticker(sticker.getId());
-                sender.sendSticker(st);
+                sendSticker();
             }
             if (msg != null) {
-                SendMessage m = new SendMessage();
-                m.setChatId(chat);
-                m.enableMarkdown(enableMarkdown);
-                m.enableHtml(enableHtml);
-                if (disableWebPagePreview) {
-                    m.disableWebPagePreview();
-                }
-                if (replyKeyboard != null) {
-                    m.setReplyMarkup(replyKeyboard);
-                }
-                if (replyKeyboard != null) {
-                    m.setReplyMarkup(replyKeyboard);
-                }
-                m.setText(msg);
-                sender.sendMessage(m);
+                sendMsg();
             }
         } catch (TelegramApiException e) {
             BotLogger.error(LOGTAG, e);
         }
+    }
+
+    private void sendMsg() throws TelegramApiException {
+        SendMessage m = new SendMessage();
+        m.setChatId(chat);
+        m.enableMarkdown(enableMarkdown);
+        m.enableHtml(enableHtml);
+        if (disableWebPagePreview) {
+            m.disableWebPagePreview();
+        }
+        if (replyKeyboard != null) {
+            m.setReplyMarkup(replyKeyboard);
+        }
+        if (replyKeyboard != null) {
+            m.setReplyMarkup(replyKeyboard);
+        }
+        m.setText(msg);
+        sender.sendMessage(m);
+    }
+
+    private void sendSticker() throws TelegramApiException {
+        SendSticker st = new SendSticker();
+        st.setChatId(chat);
+        st.setSticker(sticker.getId());
+        sender.sendSticker(st);
     }
 
     public Answer replyKeyboard(ReplyKeyboard keyboard) {

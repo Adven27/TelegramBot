@@ -48,18 +48,17 @@ public class Main {
                 Weather weather = new WeatherLoggingDecorator(
                         new SimpleWeather(weatherPrinter, weatherResource), localizationService);
 
-                MessageFromURL quoteFromURL = new MessageFromURL(new QuoteResource(), new QuotePrinter());
-                QuoteCommand quote = new QuoteCommand(quoteFromURL);
+                QuoteCommand quote = new QuoteCommand(new MessageFromURL(new QuoteResource(), new QuotePrinter()));
+                AdviceCommand advice = new AdviceCommand(new MessageFromURL(new AdviceResource(), new AdvicePrinter()));
                 JokeCommand joke = new JokeCommand(new MessageFromURL(new JokeResource(), new JokePrinter()));
 
-                telegramBotsApi.registerBot(new CommandsHandler(quote, joke,
+                telegramBotsApi.registerBot(new CommandsHandler(quote, joke, advice,
                         new WeatherCommand(weather),
                         new WhoCommand(),
                         new PollCommand(),
                         new SupCommand(dao),
                         new ITQuoteCommand(dao),
                         new DieCommand(),
-                        new GameCommand(),
                         new DebugCommand(),
                         new BardakCommand(dao)));
             } catch (TelegramApiException e) {

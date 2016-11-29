@@ -7,22 +7,22 @@ import org.telegram.telegrambots.api.objects.User;
 import org.telegram.telegrambots.bots.AbsSender;
 import org.telegram.telegrambots.bots.commands.BotCommand;
 
-import static org.telegram.services.Stickers.LOL;
+import static org.telegram.services.Stickers.BLA;
 
-public class JokeCommand extends BotCommand {
+public class AdviceCommand extends BotCommand {
 
     private final MessageFromURL messageFromURL;
 
-    public JokeCommand(MessageFromURL messageFromURL) {
-        super("ha","Print cool joke");
+    public AdviceCommand(MessageFromURL messageFromURL) {
+        super("advice", "Fucking great advice");
         this.messageFromURL = messageFromURL;
     }
 
     @Override
     public void execute(AbsSender sender, User user, Chat chat, String[] strings) {
         new Answer(sender).to(chat)
-                .sticker(LOL)
-                .message(messageFromURL.print()).disableWebPagePreview().enableHtml()
+                .sticker(BLA)
+                .message(messageFromURL.print()).enableHtml().disableWebPagePreview()
                 .send();
     }
 }

@@ -8,25 +8,41 @@ import org.telegram.sokoban.model.Model;
 import org.telegram.sokoban.view.Point;
 import org.telegram.sokoban.view.View;
 
+import java.util.LinkedList;
 import java.util.Map;
 
 public class Controller implements EventListener {
     View view;
     Model model;
 
+    public LinkedList<Map<Point, GameObject>> getHistory() {
+        return history;
+    }
+
+    LinkedList<Map<Point, GameObject>> history = new LinkedList<>();
 
     public Controller() {
+        this(0);
+    }
+
+    public Controller(int level) {
         view = new View(this);
         model = new Model();
         view.init();
-        model.restart();
+        if (level == 0)  {
+            model.restart();
+        } else {
+            model.restartLevel(level);
+        }
         model.setEventListener(this);
         view.setEventListener(this);
         view.update();
     }
 
     public Map<Point, GameObject> getGameField() {
-        return view.getGameField();
+        Map<Point, GameObject> gameField = view.getGameField();
+        history.add(gameField);
+        return gameField;
     }
 
     public GameObjects getGameObjects() {
@@ -59,4 +75,7 @@ public class Controller implements EventListener {
     }
 
 
+    public int getCurLevel() {
+        return model.currentLevel;
+    }
 }

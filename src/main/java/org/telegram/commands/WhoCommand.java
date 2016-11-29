@@ -1,5 +1,6 @@
 package org.telegram.commands;
 
+import org.telegram.fluent.Answer;
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.User;
 import org.telegram.telegrambots.bots.AbsSender;
@@ -16,7 +17,7 @@ public class WhoCommand extends BotCommand {
     @Override
     public void execute(AbsSender sender, User user, Chat chat, String[] strings) {
         Answer answer = new Answer(sender).to(chat);
-        String m = strings.length == 0 ? "перечисли имена через пробел: /who эники беники покупали печеники"
+        String m = strings.length == 0 ? "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ: /who пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ"
                                          : strings[new Random().nextInt(strings.length)];
         answer.message(m).send();
     }

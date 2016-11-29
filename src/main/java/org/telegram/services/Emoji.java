@@ -150,6 +150,8 @@ public enum Emoji {
     DOWN_DOUBLE_ARROW(null, '\u23EC'),
     RIGHT_UP_ARROW(null, '\u2934'),
     RIGHT_DOWN_ARROW(null, '\u2935'),
+    ANCHOR(null, '\u2693'),
+    SAILBOAT('\u26F5', '\uFE0F'),
 
     // Others
     LEFT_RIGHT_ARROW(null, '\u2194'),

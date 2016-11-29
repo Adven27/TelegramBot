@@ -10,7 +10,7 @@ public class Model {
     EventListener eventListener;
     public static final int FIELD_CELL_SIZE = 1;
     GameObjects gameObjects;
-    public int currentLevel = 5;
+    public int currentLevel = 7;
     LevelLoader levelLoader = new LevelLoader("/levels.txt");
 
     public void setEventListener(EventListener eventListener) {
@@ -22,6 +22,7 @@ public class Model {
     }
 
     public void restartLevel(int level) {
+        currentLevel = level;
         this.gameObjects = levelLoader.getLevel(level);
     }
 
