@@ -4,6 +4,7 @@ import org.telegram.services.Stickers;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.methods.send.SendSticker;
 import org.telegram.telegrambots.api.objects.Chat;
+import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.bots.AbsSender;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
@@ -20,6 +21,7 @@ public class Answer {
     private boolean disableWebPagePreview;
     private boolean enableHtml;
     private ReplyKeyboard replyKeyboard;
+    private Integer messageId;
 
     public Answer(AbsSender sender) {
         this.sender = sender;
@@ -60,20 +62,21 @@ public class Answer {
         return this;
     }
 
-    public void send() {
+    public Message send() {
         try {
             if (sticker != null) {
                 sendSticker();
             }
             if (msg != null) {
-                sendMsg();
+                return sendMsg();
             }
         } catch (TelegramApiException e) {
             BotLogger.error(LOGTAG, e);
         }
+        return null;
     }
 
-    private void sendMsg() throws TelegramApiException {
+    private Message sendMsg() throws TelegramApiException {
         SendMessage m = new SendMessage();
         m.setChatId(chat);
         m.enableMarkdown(enableMarkdown);
@@ -88,7 +91,7 @@ public class Answer {
             m.setReplyMarkup(replyKeyboard);
         }
         m.setText(msg);
-        sender.sendMessage(m);
+        return sender.sendMessage(m);
     }
 
     private void sendSticker() throws TelegramApiException {
@@ -98,7 +101,7 @@ public class Answer {
         sender.sendSticker(st);
     }
 
-    public Answer replyKeyboard(ReplyKeyboard keyboard) {
+    public Answer keyboard(ReplyKeyboard keyboard) {
         this.replyKeyboard = keyboard;
         return this;
     }

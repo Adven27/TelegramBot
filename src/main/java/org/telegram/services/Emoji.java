@@ -153,6 +153,22 @@ public enum Emoji {
     ANCHOR(null, '\u2693'),
     SAILBOAT('\u26F5', '\uFE0F'),
 
+    ZERO('\u0030', '\u20E3'),
+    ONE('\u0031', '\u20E3'),
+    TWO('\u0032', '\u20E3'),
+    THREE('\u0033', '\u20E3'),
+    FOUR('\u0034', '\u20E3'),
+    FIVE('\u0035', '\u20E3'),
+    SIX('\u0036', '\u20E3'),
+    SEVEN('\u0037', '\u20E3'),
+    EIGHT('\u0038', '\u20E3'),
+    NINE('\u0039', '\u20E3'),
+    TEN('\u0040', '\u20E3'),
+    EMPTY_CELL(null, '\u25FB'),
+
+    A('\u0041', '\u20E3'),
+    B('\u0042', '\u20E3'),
+
     // Others
     LEFT_RIGHT_ARROW(null, '\u2194'),
     ALARM_CLOCK(null, '\u23F0'),

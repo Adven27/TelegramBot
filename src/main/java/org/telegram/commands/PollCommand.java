@@ -2,24 +2,26 @@ package org.telegram.commands;
 
 import jersey.repackaged.com.google.common.collect.Lists;
 import org.telegram.fluent.Answer;
-import org.telegram.services.Emoji;
+import org.telegram.telegrambots.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.api.objects.CallbackQuery;
 import org.telegram.telegrambots.api.objects.Chat;
+import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.User;
 import org.telegram.telegrambots.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.bots.AbsSender;
-import org.telegram.telegrambots.bots.commands.BotCommand;
+import org.telegram.telegrambots.exceptions.TelegramApiException;
+import org.telegram.updateshandlers.CommandsHandler;
 
 import java.util.*;
 
 import static org.telegram.services.Stickers.ASK;
 
-public class PollCommand extends BotCommand {
+public class PollCommand extends CallbackCommand {
 
-    private String question;
-    public static Map<String, Map<String, List<String>>> polls = new HashMap();
+    private static final String HELP_MSG = "Пример: Чей крым? наш не_наш";
+    private static Map<String, Map<String, List<String>>> polls = new HashMap();
 
     public PollCommand() {
         super("poll","..?");
@@ -31,9 +33,9 @@ public class PollCommand extends BotCommand {
         ArrayList<String> list = Lists.newArrayList(strings);
 
         if (list.isEmpty()) {
-            answer.message("Пример: Чей крым? наш не_наш").send();
+            say(answer.message(HELP_MSG));
         } else {
-            question = "";
+            String question = "";
             int i = 0;
             for (; i < list.size(); i++) {
                 if (list.get(i).contains("?")) {
@@ -50,13 +52,12 @@ public class PollCommand extends BotCommand {
             String pollId = question.trim();
             polls.put(pollId, vars);
 
-            answer.message(question).replyKeyboard(getInlineKeyboard(pollId, vars.keySet()))
-                  .sticker(ASK)
-                  .send();
+            say(answer.message(question).keyboard(getInlineKeyboard(pollId, vars.keySet()))
+                  .sticker(ASK));
         }
     }
 
-    public static InlineKeyboardMarkup getInlineKeyboard(String pollId, Set<String> vars) {
+    private InlineKeyboardMarkup getInlineKeyboard(String pollId, Set<String> vars) {
         InlineKeyboardMarkup ikb = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> kb = new ArrayList<>();
 
@@ -72,26 +73,55 @@ public class PollCommand extends BotCommand {
         return ikb;
     }
 
-    private static ReplyKeyboardMarkup getAlertsKeyboard() {
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        replyKeyboardMarkup.setSelective(true);
-        replyKeyboardMarkup.setResizeKeyboard(true);
-        replyKeyboardMarkup.setOneTimeKeyboad(true);
+    @Override
+    public void handleCallback(CallbackQuery cb, CommandsHandler sender) {
+        String[] answer = cb.getData().split("#");
+        String pollId = answer[0];
+        String chosen = answer[1];
+        Map<String, List<String>> poll = polls.get(pollId);
+        Message message = cb.getMessage();
 
-        List<KeyboardRow> keyboard = new ArrayList<>();
+        if (poll == null) {
+            sender.removeInlineKeyboard(message);
+            return;
+        }
 
-        KeyboardRow row = new KeyboardRow();
-        row.add(" " + Emoji.HEAVY_PLUS_SIGN);
-        row.add(" " + Emoji.HEAVY_CHECK_MARK);
-        keyboard.add(row);
+        for (String v : poll.keySet()) {
+            List<String> votes = poll.get(v);
+            String voter = cb.getFrom().getLastName() + " " + cb.getFrom().getFirstName();
+            if (chosen.equals(v)) {
+                if (!votes.contains(voter)) {
+                    votes.add(voter);
+                }
+            } else {
+                if (votes.contains(voter)) {
+                    votes.remove(voter);
+                }
+            }
+            poll.put(v, votes);
+        }
+        polls.put(pollId, poll);
 
-        row = new KeyboardRow();
-        row.add(" " + Emoji.AIRPLANE);
-        row.add(" " + Emoji.ANGRY_FACE);
-        keyboard.add(row);
+        try {
+            AnswerCallbackQuery acb = new AnswerCallbackQuery();
+            String msg = message.getText();
+            String question = !msg.contains("\n\n") ? msg : msg.substring(0, msg.indexOf("\n\n"));
+            String text = question + "\n\n";
+            for (Map.Entry<String, List<String>> e : poll.entrySet()) {
+                text += e.getKey() + " - " + (e.getValue().size() == 0 ? "" : e.getValue()) + "\n";
+            }
+            acb.setText("Спасибушки");
+            acb.setCallbackQueryId(cb.getId());
+            sender.answerCallbackQuery(acb);
 
-        replyKeyboardMarkup.setKeyboard(keyboard);
-
-        return replyKeyboardMarkup;
+            EditMessageText newTxt = new EditMessageText();
+            newTxt.setMessageId(message.getMessageId());
+            newTxt.setReplyMarkup(getInlineKeyboard(pollId, poll.keySet()));
+            newTxt.setText(text);
+            newTxt.setChatId(message.getChatId().toString());
+            sender.editMessageText(newTxt);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
     }
 }

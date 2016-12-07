@@ -1,7 +1,6 @@
 package org.telegram.mamot.services;
 
-import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -48,6 +47,28 @@ public class DAO {
         }
         return list;
     }
+
+    public void saveLevel(int lvl) {
+        String file = "data.txt";
+        System.out.println("Writing to file: " + file);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(getClass().getResource("/data.txt").getPath()))) {
+            writer.write("level:" + lvl);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public int getLevel() {
+        try (BufferedReader writer = new BufferedReader(new InputStreamReader(getClass().getResourceAsStream("/data.txt")))) {
+            return Integer.valueOf(writer.readLine().split(":")[1]);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        return 1;
+    }
+
 
     public String getQuote() {
         int i = new Random().nextInt(200) + 1;

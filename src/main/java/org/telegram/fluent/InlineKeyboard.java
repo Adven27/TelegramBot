@@ -9,6 +9,8 @@ public class InlineKeyboard {
     InlineKeyboardMarkup ikb = new InlineKeyboardMarkup();
     List<List<InlineKeyboardButton>> kb = new ArrayList<>();
 
+    public InlineKeyboard() {}
+
     public InlineKeyboard row(String... textDataPairs) {
         List<InlineKeyboardButton> row = new ArrayList<>();
         for (int i =0 ; i < textDataPairs.length; i = i + 2) {

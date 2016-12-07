@@ -1,6 +1,7 @@
 package org.telegram.sokoban.model;
 
 
+import org.telegram.mamot.services.DAO;
 import org.telegram.sokoban.controller.EventListener;
 
 import java.util.Set;
@@ -10,7 +11,7 @@ public class Model {
     EventListener eventListener;
     public static final int FIELD_CELL_SIZE = 1;
     GameObjects gameObjects;
-    public int currentLevel = 7;
+    public int currentLevel = new DAO().getLevel();
     LevelLoader levelLoader = new LevelLoader("/levels.txt");
 
     public void setEventListener(EventListener eventListener) {
