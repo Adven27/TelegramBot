@@ -4,9 +4,6 @@ import org.telegram.sokoban.view.Point;
 
 import java.util.Map;
 
-/**
- * Created by k1per on 26.01.2016.
- */
 public class Wall extends CollisionObject
 {
     public Wall(int x, int y){

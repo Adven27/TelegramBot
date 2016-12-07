@@ -108,8 +108,13 @@ public class TimerExecutor {
     }
 
     @Override
-    public void finalize() {
-        this.stop();
+    public void finalize() throws Throwable {
+        try {
+            this.stop();
+        } finally {
+            super.finalize();
+        }
+
     }
 
     public void stop() {

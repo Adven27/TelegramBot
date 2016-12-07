@@ -3,8 +3,10 @@ package org.telegram;
 import org.telegram.commands.*;
 import org.telegram.mamot.services.DAO;
 import org.telegram.services.LocalizationService;
+import org.telegram.services.SimpleSkin;
 import org.telegram.services.Weather;
 import org.telegram.services.impl.*;
+import org.telegram.sokoban.view.GameFieldPrinter;
 import org.telegram.telegrambots.TelegramBotsApi;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 import org.telegram.telegrambots.logging.BotLogger;
@@ -15,6 +17,10 @@ import org.telegram.updateshandlers.WebHookExampleHandlers;
 import java.io.IOException;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
+
+import static jersey.repackaged.com.google.common.collect.Lists.newArrayList;
+import static org.telegram.services.Emoji.ANCHOR;
+import static org.telegram.services.Emoji.SAILBOAT;
 
 public class Main {
     private static final String LOGTAG = "MAIN";
@@ -31,16 +37,6 @@ public class Main {
         try {
             TelegramBotsApi telegramBotsApi = createTelegramBotsApi();
             try {
-                /*telegramBotsApi.registerBot(new ChannelHandlers());
-                telegramBotsApi.registerBot(new DirectionsHandlers());
-                telegramBotsApi.registerBot(new RaeHandlers());
-                telegramBotsApi.registerBot(new WeatherHandlers());
-                telegramBotsApi.registerBot(new TransifexHandlers());
-                telegramBotsApi.registerBot(new FilesHandlers());
-                telegramBotsApi.registerBot(new CommandsHandler());*/
-                //telegramBotsApi.registerBot(new SbertlHandlers());
-
-
                 final LocalizationService localizationService = new LocalizationService();
                 final DAO dao = new DAO();
                 WeatherPrinter weatherPrinter = new WeatherPrinter(localizationService, dao);
@@ -52,7 +48,8 @@ public class Main {
                 AdviceCommand advice = new AdviceCommand(new MessageFromURL(new AdviceResource(), new AdvicePrinter()));
                 JokeCommand joke = new JokeCommand(new MessageFromURL(new JokeResource(), new JokePrinter()));
 
-                telegramBotsApi.registerBot(new CommandsHandler(quote, joke, advice,
+                telegramBotsApi.registerBot(new CommandsHandler(
+                        quote, joke, advice,
                         new WeatherCommand(weather),
                         new WhoCommand(),
                         new PollCommand(),
@@ -60,6 +57,8 @@ public class Main {
                         new ITQuoteCommand(dao),
                         new DieCommand(),
                         new DebugCommand(),
+                        new Game2048Command(),
+                        getGameCommand(),
                         new BardakCommand(dao)));
             } catch (TelegramApiException e) {
                 BotLogger.error(LOGTAG, e);
@@ -67,6 +66,13 @@ public class Main {
         } catch (Exception e) {
             BotLogger.error(LOGTAG, e);
         }
+    }
+
+    private static GameCommand getGameCommand() {
+        return new GameCommand(newArrayList(
+                new GameFieldPrinter(new SimpleSkin("\uD83D\uDDB1", "\uD83C\uDF84", "\uD83D\uDE00", "\uD83D\uDCA9", "\uD83D\uDEBD")),
+                new GameFieldPrinter(new SimpleSkin("\uD83D\uDDB1", "\uD83C\uDF0A", "\uD83C\uDF2A", SAILBOAT.toString(), ANCHOR.toString())),
+                new GameFieldPrinter(new SimpleSkin("\uD83D\uDDB1", "\uD83D\uDC8B", "\uD83C\uDFC2", "\uD83D\uDC6F", "\uD83D\uDEC1"))));
     }
 
     private static TelegramBotsApi createTelegramBotsApi() throws TelegramApiException {

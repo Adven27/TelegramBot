@@ -3,9 +3,6 @@ package org.telegram.sokoban.model;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Created by k1per on 26.01.2016.
- */
 public class GameObjects {
     private Set<Wall> walls;
     private Set<Box> boxes;

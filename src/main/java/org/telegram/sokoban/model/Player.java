@@ -4,9 +4,6 @@ import org.telegram.sokoban.view.Point;
 
 import java.util.Map;
 
-/**
- * Created by k1per on 26.01.2016.
- */
 public class Player extends CollisionObject implements Movable {
     public Player(int x, int y) {
         super(x, y);

@@ -1,11 +1,11 @@
 package org.telegram.commands;
 
 import org.telegram.fluent.Answer;
+import org.telegram.fluent.EditedMessage;
 import org.telegram.fluent.InlineKeyboard;
 import org.telegram.games.game2048.Game2048;
 import org.telegram.services.Emoji;
 import org.telegram.telegrambots.api.methods.AnswerCallbackQuery;
-import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.api.objects.CallbackQuery;
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.Message;
@@ -13,8 +13,6 @@ import org.telegram.telegrambots.api.objects.User;
 import org.telegram.telegrambots.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.bots.AbsSender;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
-import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
-import org.telegram.telegrambots.logging.BotLogger;
 import org.telegram.updateshandlers.CommandsHandler;
 
 import java.util.*;
@@ -43,11 +41,11 @@ public class Game2048Command extends CallbackCommand {
         Answer answer = new Answer(sender).to(chat);
         String userName = getUserName(user);
         if (userGames.get(userName) != null && strings.length == 0) {
-            say(answer.message(screen()).keyboard(getInlineKeyboard()));
+            sendAndWaitForCallback(answer.message(screen()).keyboard(getInlineKeyboard()));
             return;
         }
         userGames.put(userName, new Game2048());
-        say(answer.message(screen()).keyboard(getInlineKeyboard()));
+        sendAndWaitForCallback(answer.message(screen()).keyboard(getInlineKeyboard()));
     }
 
     private String getUserName(User user) {
@@ -131,63 +129,38 @@ public class Game2048Command extends CallbackCommand {
     }
 
     @Override
-    public void handleCallback(CallbackQuery cb, CommandsHandler sender) {
-        try {
-            Message message = cb.getMessage();
-            if (userGames.isEmpty()) {
-                sender.removeInlineKeyboard(message);
-                return;
-            }
-            String data = cb.getData();
-            User from = cb.getFrom();
+    protected void handleCallback(CallbackQuery cb, CommandsHandler sender) throws TelegramApiException {
+        Message message = cb.getMessage();
+        if (userGames.isEmpty()) {
+            sender.removeInlineKeyboard(message);
+            return;
+        }
+        String data = cb.getData();
+        User from = cb.getFrom();
 
-            String userName = getUserName(from);
-            Game2048 g = userGames.get(userName);
-            if (g == null) {
-                userGames.put(userName, new Game2048());
-            } else {
-                switch (data) {
-                    case "left":    g.left();  break;
-                    case "right":   g.right(); break;
-                    case "up":      g.up();    break;
-                    case "down":    g.down();  break;
-                    case "restart": g.resetGame(); break;
-                }
-            }
+        doAction(data, from);
 
-            EditMessageText newTxt = new EditMessageText();
-            newTxt.setMessageId(message.getMessageId());
-            newTxt.setReplyMarkup(getInlineKeyboard());
-            newTxt.setText(screen());
-            newTxt.setChatId(message.getChatId().toString());
-            sender.editMessageText(newTxt);
+        new EditedMessage(sender, message).newText(screen()).keyboard(getInlineKeyboard()).send();
 
-            AnswerCallbackQuery acb = new AnswerCallbackQuery();
-            acb.setText(data);
-            acb.setCallbackQueryId(cb.getId());
-            sender.answerCallbackQuery(acb);
-        } catch (TelegramApiRequestException e) {
-            if (e.getErrorCode().equals(429)) {
-                AnswerCallbackQuery acb = new AnswerCallbackQuery();
-                acb.setText("Чот приуныл...\n" + e.getApiResponse());
-                acb.setCallbackQueryId(cb.getId());
-                try {
-                    sender.answerCallbackQuery(acb);
-                } catch (TelegramApiException e1) {
-                    BotLogger.error(LOGTAG, e1);
-                }
-            } else if(e.getErrorCode().equals(400)) {
-                AnswerCallbackQuery acb = new AnswerCallbackQuery();
-                acb.setCallbackQueryId(cb.getId());
-                try {
-                    sender.answerCallbackQuery(acb);
-                } catch (TelegramApiException e1) {
-                    BotLogger.error(LOGTAG, e1);
-                }
+        AnswerCallbackQuery acb = new AnswerCallbackQuery();
+        acb.setText(data);
+        acb.setCallbackQueryId(cb.getId());
+        sender.answerCallbackQuery(acb);
+    }
+
+    private void doAction(String action, User from) {
+        String userName = getUserName(from);
+        Game2048 g = userGames.get(userName);
+        if (g == null) {
+            userGames.put(userName, new Game2048());
+        } else {
+            switch (action) {
+                case "left":    g.left();  break;
+                case "right":   g.right(); break;
+                case "up":      g.up();    break;
+                case "down":    g.down();  break;
+                case "restart": g.resetGame(); break;
             }
-            BotLogger.error(LOGTAG, e);
-        } catch (TelegramApiException e) {
-            BotLogger.error(LOGTAG, e);
         }
     }
 }

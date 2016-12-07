@@ -44,7 +44,7 @@ public class InlineQueryHandler {
     }
 
     static List<InlineQueryResult> convertRaeResults(List<RaeService.RaeResult> raeResults) {
-        List<InlineQueryResult> results = new ArrayList<InlineQueryResult>();
+        List<InlineQueryResult> results = new ArrayList<>();
         for (int i = 0; i < raeResults.size(); i++) {
             RaeService.RaeResult raeResult = raeResults.get(i);
             InputTextMessageContent messageContent = new InputTextMessageContent();

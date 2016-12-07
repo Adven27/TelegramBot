@@ -21,7 +21,6 @@ public class Answer {
     private boolean disableWebPagePreview;
     private boolean enableHtml;
     private ReplyKeyboard replyKeyboard;
-    private Integer messageId;
 
     public Answer(AbsSender sender) {
         this.sender = sender;
@@ -62,6 +61,11 @@ public class Answer {
         return this;
     }
 
+    public Answer keyboard(ReplyKeyboard keyboard) {
+        this.replyKeyboard = keyboard;
+        return this;
+    }
+
     public Message send() {
         try {
             if (sticker != null) {
@@ -87,22 +91,14 @@ public class Answer {
         if (replyKeyboard != null) {
             m.setReplyMarkup(replyKeyboard);
         }
-        if (replyKeyboard != null) {
-            m.setReplyMarkup(replyKeyboard);
-        }
         m.setText(msg);
         return sender.sendMessage(m);
     }
 
     private void sendSticker() throws TelegramApiException {
-        SendSticker st = new SendSticker();
-        st.setChatId(chat);
-        st.setSticker(sticker.getId());
-        sender.sendSticker(st);
-    }
-
-    public Answer keyboard(ReplyKeyboard keyboard) {
-        this.replyKeyboard = keyboard;
-        return this;
+        SendSticker s = new SendSticker();
+        s.setChatId(chat);
+        s.setSticker(sticker.getId());
+        sender.sendSticker(s);
     }
 }

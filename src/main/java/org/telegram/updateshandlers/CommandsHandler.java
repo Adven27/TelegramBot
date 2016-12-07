@@ -1,37 +1,28 @@
 package org.telegram.updateshandlers;
 
 import org.telegram.commands.CallbackCommand;
-import org.telegram.commands.Game2048Command;
-import org.telegram.commands.GameCommand;
 import org.telegram.commands.HelpCommand;
 import org.telegram.fluent.Answer;
+import org.telegram.fluent.EditedMessage;
 import org.telegram.mamot.services.DAO;
 import org.telegram.mamot.services.Mamorator;
 import org.telegram.services.CustomTimerTask;
 import org.telegram.services.Events;
-import org.telegram.services.SimpleSkin;
 import org.telegram.services.TimerExecutor;
-import org.telegram.sokoban.view.GameFieldPrinter;
-import org.telegram.telegrambots.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.api.objects.CallbackQuery;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingCommandBot;
 import org.telegram.telegrambots.bots.commands.BotCommand;
-import org.telegram.telegrambots.exceptions.TelegramApiException;
 
-import static jersey.repackaged.com.google.common.collect.Lists.newArrayList;
 import static org.telegram.BotConfig.COMMANDS_TOKEN;
 import static org.telegram.BotConfig.COMMANDS_USER;
-import static org.telegram.services.Emoji.*;
+import static org.telegram.services.Emoji.AMBULANCE;
 
 public class CommandsHandler extends TelegramLongPollingCommandBot {
 
-    private static final String LOGTAG = "COMMANDSHANDLER";
     private static final String CHAT_ID = "-145229307";//"229669496";;
     private final InlineQueryHandler inlineQueryHandler = new InlineQueryHandler(this);
-    private final GameCommand gameCommand;
-    private final Game2048Command game2048Command;
 
     public CommandsHandler(BotCommand... commands) {
         registerAlerts();
@@ -39,15 +30,6 @@ public class CommandsHandler extends TelegramLongPollingCommandBot {
         for (BotCommand cmd : commands) {
             register(cmd);
         }
-
-        game2048Command = new Game2048Command();
-        gameCommand = new GameCommand(newArrayList(
-                new GameFieldPrinter(new SimpleSkin("\uD83D\uDDB1", "\uD83C\uDF84", "\uD83D\uDE00", "\uD83D\uDCA9", "\uD83D\uDEBD")),
-                new GameFieldPrinter(new SimpleSkin("\uD83D\uDDB1", "\uD83C\uDF0A", "\uD83C\uDF2A", SAILBOAT.toString(), ANCHOR.toString())),
-                new GameFieldPrinter(new SimpleSkin("\uD83D\uDDB1", "\uD83D\uDC8B", "\uD83C\uDFC2", "\uD83D\uDC6F", "\uD83D\uDEC1"))));
-
-        register(gameCommand);
-        register(game2048Command);
 
         HelpCommand helpCommand = new HelpCommand(this);
         register(helpCommand);
@@ -90,9 +72,7 @@ public class CommandsHandler extends TelegramLongPollingCommandBot {
                     answer.message(new Mamorator(new DAO()).mamate(msg.getText())).send();
                 }
             } else {
-                msg.getEntities().stream().filter(e -> e.getType().equals("url")).forEach(e -> {
-                    answer.message("Link").send();
-                });
+                msg.getEntities().stream().filter(e -> e.getType().equals("url")).forEach(e -> answer.message("Link").send());
             }
         } else if (update.hasInlineQuery()) {
             inlineQueryHandler.handleIncomingInlineQuery(update.getInlineQuery());
@@ -111,16 +91,8 @@ public class CommandsHandler extends TelegramLongPollingCommandBot {
         removeInlineKeyboard(cb.getMessage());
     }
 
-    public void removeInlineKeyboard(Message message) {
-        try {
-            EditMessageText newTxt = new EditMessageText();
-            newTxt.setMessageId(message.getMessageId());
-            newTxt.setChatId(message.getChatId().toString());
-            newTxt.setText(message.getText());
-            editMessageText(newTxt);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
-        }
+    public void removeInlineKeyboard(Message m) {
+        new EditedMessage(this, m).newText(m.getText()).send();
     }
 
     private void startAlertTimers(Events e) {

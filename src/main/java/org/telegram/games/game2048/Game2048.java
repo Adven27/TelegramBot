@@ -94,7 +94,7 @@ public class Game2048 {
     }
 
     private List<Tile> availableSpace() {
-        final List<Tile> list = new ArrayList<Tile>(16);
+        final List<Tile> list = new ArrayList<>(16);
         for (Tile t : myTiles) {
             if (t.isEmpty()) {
                 list.add(t);
@@ -161,7 +161,7 @@ public class Game2048 {
     }
 
     private Tile[] moveLine(Tile[] oldLine) {
-        LinkedList<Tile> l = new LinkedList<Tile>();
+        LinkedList<Tile> l = new LinkedList<>();
         for (int i = 0; i < 4; i++) {
             if (!oldLine[i].isEmpty())
                 l.addLast(oldLine[i]);
@@ -179,7 +179,7 @@ public class Game2048 {
     }
 
     private Tile[] mergeLine(Tile[] oldLine) {
-        LinkedList<Tile> list = new LinkedList<Tile>();
+        LinkedList<Tile> list = new LinkedList<>();
         for (int i = 0; i < 4 && !oldLine[i].isEmpty(); i++) {
             int num = oldLine[i].value;
             if (i < 3 && oldLine[i].value == oldLine[i + 1].value) {
