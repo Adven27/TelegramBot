@@ -7,14 +7,15 @@ import org.telegram.fluent.EditedMessage;
 import org.telegram.mamot.services.DAO;
 import org.telegram.mamot.services.Huerator;
 import org.telegram.mamot.services.Mamorator;
-import org.telegram.services.CustomTimerTask;
-import org.telegram.services.Events;
-import org.telegram.services.TimerExecutor;
 import org.telegram.telegrambots.api.objects.CallbackQuery;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingCommandBot;
 import org.telegram.telegrambots.bots.commands.BotCommand;
+import org.telegram.timertasks.CustomTimerTask;
+import org.telegram.timertasks.TimerExecutor;
+
+import java.util.List;
 
 import static org.telegram.BotConfig.COMMANDS_TOKEN;
 import static org.telegram.BotConfig.COMMANDS_USER;
@@ -22,41 +23,34 @@ import static org.telegram.services.Emoji.AMBULANCE;
 
 public class CommandsHandler extends TelegramLongPollingCommandBot {
 
-    private static final String CHAT_ID = "-145229307";//"229669496";;
     private final InlineQueryHandler inlineQueryHandler = new InlineQueryHandler(this);
 
-    public CommandsHandler(BotCommand... commands) {
-        registerAlerts();
-
-        for (BotCommand cmd : commands) {
-            register(cmd);
-        }
+    public CommandsHandler(List<CustomTimerTask> tasks, BotCommand... commands) {
+        scheduleTasks(tasks);
+        registerCommands(commands);
 
         HelpCommand helpCommand = new HelpCommand(this);
         register(helpCommand);
 
         registerDefaultAction((sender, message) -> {
             new Answer(sender).to(message.getChat())
-                .message("The command '" + message.getText() + "' is not known by this bot. Here comes some help " + AMBULANCE)
-                .send();
-            helpCommand.execute(sender, message.getFrom(), message.getChat(), new String[] {});
+                    .message("The command '" + message.getText() + "' is not known by this bot. Here comes some help " + AMBULANCE)
+                    .send();
+            helpCommand.execute(sender, message.getFrom(), message.getChat(), new String[]{});
         });
     }
 
-    private void registerAlerts() {
-        for (Events e : Events.values()) {
-            startAlertTimers(e);
+    private void registerCommands(BotCommand[] commands) {
+        for (BotCommand cmd : commands) {
+            register(cmd);
         }
-        /*TimerExecutor.getInstance().startExecutionOnRandomHourAt(new CustomTimerTask("Quotes", -1) {
-            @Override
-            public void execute() {
-                //TODO get rid of this shit
-                new Answer(CommandsHandler.this).to(CHAT_ID)
-                        .sticker(THINK)
-                        .message(new DAO().getQuote()).disableWebPagePreview()
-                        .send();
-            }
-        }, 15 , 52, 0);*/
+    }
+
+    private void scheduleTasks(List<CustomTimerTask> tasks) {
+        for (CustomTimerTask t : tasks) {
+            t.setSender(this);
+            TimerExecutor.getInstance().schedule(t);
+        }
     }
 
     @Override
@@ -98,18 +92,6 @@ public class CommandsHandler extends TelegramLongPollingCommandBot {
 
     public void removeInlineKeyboard(Message m) {
         new EditedMessage(this, m).newText(m.getText()).send();
-    }
-
-    private void startAlertTimers(Events e) {
-        TimerExecutor.getInstance().startExecutionEveryDayAt(new CustomTimerTask(e.name(), -1) {
-            @Override
-            public void execute() {
-                new Answer(CommandsHandler.this).to(CHAT_ID)
-                        .sticker(e.sticker())
-                        .message(e.msg()).disableWebPagePreview()
-                        .send();
-            }
-        }, e.time().getHour(), e.time().getMinute(), e.time().getSecond());
     }
 
     @Override

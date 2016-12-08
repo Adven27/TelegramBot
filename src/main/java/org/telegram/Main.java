@@ -1,7 +1,9 @@
 package org.telegram;
 
 import org.telegram.commands.*;
+import org.telegram.fluent.Answer;
 import org.telegram.mamot.services.DAO;
+import org.telegram.services.Events;
 import org.telegram.services.LocalizationService;
 import org.telegram.services.SimpleSkin;
 import org.telegram.services.Weather;
@@ -11,19 +13,25 @@ import org.telegram.telegrambots.TelegramBotsApi;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 import org.telegram.telegrambots.logging.BotLogger;
 import org.telegram.telegrambots.logging.BotsFileHandler;
+import org.telegram.timertasks.CustomTimerTask;
+import org.telegram.timertasks.DailyTask;
 import org.telegram.updateshandlers.CommandsHandler;
 import org.telegram.updateshandlers.WebHookExampleHandlers;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 
+import static java.time.LocalDateTime.now;
 import static jersey.repackaged.com.google.common.collect.Lists.newArrayList;
 import static org.telegram.services.Emoji.ANCHOR;
 import static org.telegram.services.Emoji.SAILBOAT;
 
 public class Main {
     private static final String LOGTAG = "MAIN";
+    private static final String SBT_TEAM_CHAT_ID = "-145229307";//"229669496";;
 
     public static void main(String[] args) {
         BotLogger.setLevel(Level.ALL);
@@ -48,7 +56,7 @@ public class Main {
                 AdviceCommand advice = new AdviceCommand(new MessageFromURL(new AdviceResource(), new AdvicePrinter()));
                 JokeCommand joke = new JokeCommand(new MessageFromURL(new JokeResource(), new JokePrinter()));
 
-                telegramBotsApi.registerBot(new CommandsHandler(
+                telegramBotsApi.registerBot(new CommandsHandler(getTimerTasks(),
                         quote, joke, advice,
                         new WeatherCommand(weather),
                         new WhoCommand(),
@@ -66,6 +74,27 @@ public class Main {
         } catch (Exception e) {
             BotLogger.error(LOGTAG, e);
         }
+    }
+
+    private static List<CustomTimerTask> getTimerTasks() {
+        List<CustomTimerTask> tasks = newArrayList();
+        for (Events e : Events.values()) {
+           tasks.add(new DailyTask(e.name(), -1) {
+               @Override
+               protected LocalDateTime startAt() {
+                   return now().with(e.time());
+               }
+
+               @Override
+               public void execute() {
+                   new Answer(sender).to(SBT_TEAM_CHAT_ID)
+                           .sticker(e.sticker())
+                           .message(e.msg()).disableWebPagePreview()
+                           .send();
+               }
+           });
+        }
+        return tasks;
     }
 
     private static GameCommand getGameCommand() {

@@ -49,11 +49,15 @@ public class PollCommand extends CallbackCommand {
             for (String var : list.subList(i + 1, list.size())) {
                 vars.put(var, new ArrayList<>());
             }
-            String pollId = String.valueOf(System.currentTimeMillis());
+            String pollId = generatePollId();
             polls.put(pollId, vars);
 
             sendAndWaitForCallback(answer.message(question).keyboard(getKeyboard(pollId, vars.keySet())).sticker(ASK));
         }
+    }
+
+    private String generatePollId() {
+        return String.valueOf(System.currentTimeMillis());
     }
 
     private InlineKeyboardMarkup getKeyboard(String pollId, Set<String> vars) {

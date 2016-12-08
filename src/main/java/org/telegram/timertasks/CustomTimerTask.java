@@ -1,39 +1,21 @@
-package org.telegram.services;
+package org.telegram.timertasks;
 
-/**
- * @author Ruben Bermudez
- * @version 2.0
- * @brief Task to be execute periodically
- * @date 28/01/15
- */
+import org.telegram.telegrambots.bots.AbsSender;
+
 public abstract class CustomTimerTask {
-    private String taskName = ""; ///< Task name
+    private String taskName = "";
     private int times = 1;
+    protected AbsSender sender;
 
-    /**
-     * Constructor
-     *
-     * @param taskName Name of the task
-     */
     public CustomTimerTask(String taskName, int times) {
         this.taskName = taskName;
         this.times = times;
     }
 
-    /**
-     * Get name
-     *
-     * @return name
-     */
     public String getTaskName() {
         return this.taskName;
     }
 
-    /**
-     * Set name
-     *
-     * @param taskName new name
-     */
     public void setTaskName(String taskName) {
         this.taskName = taskName;
     }
@@ -62,8 +44,11 @@ public abstract class CustomTimerTask {
         }
     }
 
-    /**
-     * @abstract Should contain the functionality of the task
-     */
     public abstract void execute();
+
+    public abstract long computeDelay();
+
+    public void setSender(AbsSender sender) {
+        this.sender = sender;
+    }
 }

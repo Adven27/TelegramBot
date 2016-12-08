@@ -1,7 +1,7 @@
 package org.telegram.commands;
 
 import org.telegram.fluent.Answer;
-import org.telegram.services.TimerExecutor;
+import org.telegram.timertasks.TimerExecutor;
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.User;
 import org.telegram.telegrambots.bots.AbsSender;

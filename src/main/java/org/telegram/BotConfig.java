@@ -1,15 +1,6 @@
 package org.telegram;
 
-/**
- * @author Ruben Bermudez
- * @version 1.0
- * @brief Bots configurations
- * @date 20 of June of 2015
- */
 public class BotConfig {
-    public static final String SBERTL_TOKEN = "285485905:AAFtVhy8o02hU0Jf8zDypEwblPWov-9ko-A";
-    public static final String SBERTL_USER = "sbertlBot";
-
     public static final String WEATHER_TOKEN = "<token>";
     public static final String WEATHER_USER = "weatherbot";
 

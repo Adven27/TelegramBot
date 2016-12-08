@@ -4,13 +4,14 @@ import org.telegram.BotConfig;
 import org.telegram.Commands;
 import org.telegram.database.DatabaseManager;
 import org.telegram.mamot.services.DAO;
-import org.telegram.services.*;
+import org.telegram.services.Emoji;
+import org.telegram.services.LocalizationService;
+import org.telegram.services.Weather;
 import org.telegram.services.impl.SimpleWeather;
+import org.telegram.services.impl.WeatherLoggingDecorator;
 import org.telegram.services.impl.WeatherPrinter;
 import org.telegram.services.impl.WeatherResource;
-import org.telegram.services.impl.WeatherLoggingDecorator;
 import org.telegram.structure.WeatherAlert;
-import org.telegram.telegrambots.exceptions.TelegramApiException;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
@@ -20,6 +21,7 @@ import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardHide;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.exceptions.TelegramApiException;
 import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.logging.BotLogger;
 
@@ -55,7 +57,6 @@ public class WeatherHandlers extends TelegramLongPollingBot {
 
     public WeatherHandlers() {
         super();
-        startAlertTimers();
     }
 
     @Override
@@ -80,22 +81,6 @@ public class WeatherHandlers extends TelegramLongPollingBot {
     @Override
     public String getBotUsername() {
         return BotConfig.WEATHER_USER;
-    }
-
-    private void startAlertTimers() {
-        TimerExecutor.getInstance().startExecutionEveryDayAt(new CustomTimerTask("First day alert", -1) {
-            @Override
-            public void execute() {
-                sendAlerts();
-            }
-        }, 0, 0, 0);
-
-        TimerExecutor.getInstance().startExecutionEveryDayAt(new CustomTimerTask("Second day alert", -1) {
-            @Override
-            public void execute() {
-                sendAlerts();
-            }
-        }, 12, 0, 0);
     }
 
     private void sendAlerts() {
