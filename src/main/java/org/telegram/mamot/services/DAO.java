@@ -111,4 +111,8 @@ public class DAO {
                words3.get(random.nextInt(5)) + " " +
                words4.get(random.nextInt(4));
     }
+
+    public void updateScore(int score) {
+
+    }
 }

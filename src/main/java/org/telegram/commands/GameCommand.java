@@ -29,7 +29,6 @@ public class GameCommand extends CallbackCommand {
     private static final String LEFT = LEFT_ARROW.toString();
     private static final String RIGHT = RIGHT_ARROW.toString();
     private static final String RESTART = "\uD83D\uDD04";
-    private static final String LOGTAG = "GAMECOMMAND";
     private static final String NEXT_SKIN = "\uD83C\uDFA6";
 
     public static int x = 0;
@@ -114,7 +113,7 @@ public class GameCommand extends CallbackCommand {
     }
 
     @Override
-    protected void handleCallback(CallbackQuery cb,  CommandsHandler sender) throws TelegramApiException {
+    protected void handleCallback(CallbackQuery cb, AnswerCallbackQuery acb,  CommandsHandler sender) throws TelegramApiException {
         Message message = cb.getMessage();
         if (controller == null) {
             sender.removeInlineKeyboard(message);
@@ -126,11 +125,6 @@ public class GameCommand extends CallbackCommand {
         doAction(data, from);
 
         new EditedMessage(sender, message).keyboard(getKeyboard()).newText(getStat() + screen()).send();
-
-        AnswerCallbackQuery acb = new AnswerCallbackQuery();
-        acb.setText(data);
-        acb.setCallbackQueryId(cb.getId());
-        sender.answerCallbackQuery(acb);
     }
 
     private void doAction(String data, String from) {

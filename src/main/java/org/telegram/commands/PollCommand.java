@@ -1,21 +1,21 @@
 package org.telegram.commands;
 
-import jersey.repackaged.com.google.common.collect.Lists;
 import org.telegram.fluent.Answer;
 import org.telegram.fluent.EditedMessage;
+import org.telegram.fluent.InlineKeyboard;
 import org.telegram.telegrambots.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.api.objects.CallbackQuery;
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.User;
 import org.telegram.telegrambots.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.bots.AbsSender;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 import org.telegram.updateshandlers.CommandsHandler;
 
 import java.util.*;
 
+import static jersey.repackaged.com.google.common.collect.Lists.newArrayList;
 import static org.telegram.services.Stickers.ASK;
 
 public class PollCommand extends CallbackCommand {
@@ -30,7 +30,7 @@ public class PollCommand extends CallbackCommand {
     @Override
     public void execute(AbsSender sender, User user, Chat chat, String[] strings) {
         Answer answer = new Answer(sender).to(chat);
-        ArrayList<String> list = Lists.newArrayList(strings);
+        ArrayList<String> list = newArrayList(strings);
 
         if (list.isEmpty()) {
             answer.message(HELP_MSG).send();
@@ -49,7 +49,7 @@ public class PollCommand extends CallbackCommand {
             for (String var : list.subList(i + 1, list.size())) {
                 vars.put(var, new ArrayList<>());
             }
-            String pollId = question.trim();
+            String pollId = String.valueOf(System.currentTimeMillis());
             polls.put(pollId, vars);
 
             sendAndWaitForCallback(answer.message(question).keyboard(getKeyboard(pollId, vars.keySet())).sticker(ASK));
@@ -57,23 +57,16 @@ public class PollCommand extends CallbackCommand {
     }
 
     private InlineKeyboardMarkup getKeyboard(String pollId, Set<String> vars) {
-        InlineKeyboardMarkup ikb = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> kb = new ArrayList<>();
-
-        List<InlineKeyboardButton> row = new ArrayList<>();
+        LinkedList<String> textDataPairs = new LinkedList<>();
         for (String v : vars) {
-            InlineKeyboardButton b = new InlineKeyboardButton();
-            b.setCallbackData(pollId + "#" + v);
-            b.setText(v);
-            row.add(b);
+            textDataPairs.add(v);
+            textDataPairs.add(pollId + "#" + v);
         }
-        kb.add(row);
-        ikb.setKeyboard(kb);
-        return ikb;
+        return new InlineKeyboard().row(textDataPairs.toArray(new String[textDataPairs.size()])).build();
     }
 
     @Override
-    protected void handleCallback(CallbackQuery cb, CommandsHandler sender) throws TelegramApiException {
+    protected void handleCallback(CallbackQuery cb, AnswerCallbackQuery acb, CommandsHandler sender) throws TelegramApiException {
         String[] answer = cb.getData().split("#");
         String pollId = answer[0];
         String chosen = answer[1];
@@ -101,17 +94,14 @@ public class PollCommand extends CallbackCommand {
         }
         polls.put(pollId, poll);
 
-        AnswerCallbackQuery acb = new AnswerCallbackQuery();
         String msg = message.getText();
         String question = !msg.contains("\n\n") ? msg : msg.substring(0, msg.indexOf("\n\n"));
         String text = question + "\n\n";
         for (Map.Entry<String, List<String>> e : poll.entrySet()) {
             text += e.getKey() + " - " + (e.getValue().size() == 0 ? "" : e.getValue()) + "\n";
         }
-        acb.setText("Спасибушки");
-        acb.setCallbackQueryId(cb.getId());
-        sender.answerCallbackQuery(acb);
 
+        acb.setText("Спасибушки");
         new EditedMessage(sender, message).keyboard(getKeyboard(pollId, poll.keySet())).newText(text).send();
     }
 }

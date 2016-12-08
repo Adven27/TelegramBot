@@ -57,7 +57,7 @@ public class Main {
                         new ITQuoteCommand(dao),
                         new DieCommand(),
                         new DebugCommand(),
-                        new Game2048Command(),
+                        new Game2048Command(dao),
                         getGameCommand(),
                         new BardakCommand(dao)));
             } catch (TelegramApiException e) {

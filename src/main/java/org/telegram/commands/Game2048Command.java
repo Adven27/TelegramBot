@@ -4,6 +4,7 @@ import org.telegram.fluent.Answer;
 import org.telegram.fluent.EditedMessage;
 import org.telegram.fluent.InlineKeyboard;
 import org.telegram.games.game2048.Game2048;
+import org.telegram.mamot.services.DAO;
 import org.telegram.services.Emoji;
 import org.telegram.telegrambots.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.api.objects.CallbackQuery;
@@ -30,10 +31,11 @@ public class Game2048Command extends CallbackCommand {
     private static final String WON_MSG = " \uD83C\uDF89\uD83C\uDF89\uD83C\uDF89";
     private static final String BORDER = "\uD83D\uDDB1";
     private static Map<String, Game2048> userGames = new HashMap<>();
-    private static final String LOGTAG = "GAME2048COMMAND";
+    private final DAO dao;
 
-    public Game2048Command() {
+    public Game2048Command(DAO dao) {
         super("game2048","Game 2048");
+        this.dao = dao;
     }
 
     @Override
@@ -83,6 +85,9 @@ public class Game2048Command extends CallbackCommand {
             Game2048 g = game.getValue();
             gs.add(g);
             msg += game.getKey() + " " + g.getScore();
+
+            dao.updateScore(g.getScore());
+
             if (g.isLose()) {
                 msg += LOSE_MSG;
             } else if (g.isWin()) {
@@ -96,7 +101,6 @@ public class Game2048Command extends CallbackCommand {
 
         List<List<Game2048>> rows = new ArrayList<>();
         List<Game2048> row = new ArrayList<>();
-
 
         int size = gs.size();
         for (int i = 0; i < size; i++) {
@@ -129,7 +133,7 @@ public class Game2048Command extends CallbackCommand {
     }
 
     @Override
-    protected void handleCallback(CallbackQuery cb, CommandsHandler sender) throws TelegramApiException {
+    protected void handleCallback(CallbackQuery cb, AnswerCallbackQuery acb, CommandsHandler sender) throws TelegramApiException {
         Message message = cb.getMessage();
         if (userGames.isEmpty()) {
             sender.removeInlineKeyboard(message);
@@ -141,11 +145,6 @@ public class Game2048Command extends CallbackCommand {
         doAction(data, from);
 
         new EditedMessage(sender, message).newText(screen()).keyboard(getInlineKeyboard()).send();
-
-        AnswerCallbackQuery acb = new AnswerCallbackQuery();
-        acb.setText(data);
-        acb.setCallbackQueryId(cb.getId());
-        sender.answerCallbackQuery(acb);
     }
 
     private void doAction(String action, User from) {
