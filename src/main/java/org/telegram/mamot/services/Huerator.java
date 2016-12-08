@@ -16,18 +16,22 @@ public class Huerator {
     }
 
     public String huate(String message) {
-        for (int i = 0; i < message.length(); i++) {
-            Character ch = (char) message.codePointAt(i);
-            if (isVowel(ch)) {
-                message = message.substring(i);
-                if (isSubstitutable(ch)) {
-                    Character pair = VOWEL_PAIRS.get(ch);
-                    message = message.replaceFirst(ch.toString(), pair.toString());
+        String res = "";
+        for (String word : message.trim().replaceAll(" +", " ").split(" ")) {
+            for (int i = 0; i < word.length(); i++) {
+                Character ch = Character.toLowerCase(word.charAt(i));
+                if (isVowel(ch)) {
+                    word = word.substring(i);
+                    if (isSubstitutable(ch)) {
+                        Character pair = VOWEL_PAIRS.get(ch);
+                        word = word.replaceFirst(ch.toString(), pair.toString());
+                    }
+                    break;
                 }
-                break;
             }
+            res += "υσ" + word + " ";
         }
-        return "υσ" + message;
+        return res;
     }
 
     private static boolean isSubstitutable(Character ch) {
