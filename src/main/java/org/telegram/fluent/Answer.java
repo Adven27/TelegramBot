@@ -8,11 +8,8 @@ import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.bots.AbsSender;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
-import org.telegram.telegrambots.logging.BotLogger;
 
 public class Answer {
-    private static final String LOGTAG = "ANSWER";
-
     private final AbsSender sender;
     private String chat;
     private Stickers sticker;
@@ -69,13 +66,13 @@ public class Answer {
     public Message send() {
         try {
             if (sticker != null) {
-                sendSticker();
+               sendSticker();
             }
             if (msg != null) {
                 return sendMsg();
             }
         } catch (TelegramApiException e) {
-            BotLogger.error(LOGTAG, e);
+            throw new ApiException(e);
         }
         return null;
     }
@@ -83,8 +80,12 @@ public class Answer {
     private Message sendMsg() throws TelegramApiException {
         SendMessage m = new SendMessage();
         m.setChatId(chat);
-        m.enableMarkdown(enableMarkdown);
-        m.enableHtml(enableHtml);
+        if (enableMarkdown) {
+            m.enableMarkdown(true);
+        }
+        if (enableHtml) {
+            m.enableHtml(true);
+        }
         if (disableWebPagePreview) {
             m.disableWebPagePreview();
         }

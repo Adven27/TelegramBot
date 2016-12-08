@@ -14,7 +14,7 @@ public class WeatherResource extends JsonResource {
     private static final String FORECASTPATH = "forecast/daily";
     private static final String CURRENTPATH = "weather";
     private static final String APIIDEND = "&APPID=" + BuildVars.OPENWEATHERAPIKEY;
-    private static final String REQUEST_PARAMS = "&cnt=1&units=@units@&lang=@language@";
+    private static final String REQUEST_PARAMS = "&cnt=7&units=@units@&lang=@language@";
 
     public JSONObject fetchForecastBy(String city, String language, String units) {
         return getObjectFrom(buildForecastUrlBy(city, language, units));

@@ -9,6 +9,7 @@ import org.telegram.telegrambots.exceptions.TelegramApiRequestException;
 import org.telegram.updateshandlers.CommandsHandler;
 
 import static org.telegram.telegrambots.logging.BotLogger.error;
+import static org.telegram.telegrambots.logging.BotLogger.warn;
 
 abstract public class CallbackCommand extends BotCommand {
     private static final String LOGTAG = "CALLBACKCOMMAND";
@@ -32,7 +33,7 @@ abstract public class CallbackCommand extends BotCommand {
                 handleCallback(cb, acb, sender);
                 sender.answerCallbackQuery(acb);
             } catch (TelegramApiRequestException e) {
-                handleReqLimitOrUnmodifiedMsgException(cb, acb, sender, e);
+                handleReqLimitOrUnmodifiedMsgException(acb, sender, e);
                 error(LOGTAG, e);
             } catch (Exception e) {
                 error(LOGTAG, e);
@@ -42,19 +43,19 @@ abstract public class CallbackCommand extends BotCommand {
         return false;
     }
 
-    private void handleReqLimitOrUnmodifiedMsgException(CallbackQuery cb, AnswerCallbackQuery acb, CommandsHandler sender, TelegramApiRequestException e) {
+    private void handleReqLimitOrUnmodifiedMsgException(AnswerCallbackQuery acb, CommandsHandler sender, TelegramApiRequestException e) {
         if (isError(e, REQ_LIMIT_REACHED)) {
             acb.setText("Чот приуныл...\n" + e.getApiResponse());
             try {
                 sender.answerCallbackQuery(acb);
             } catch (TelegramApiException e1) {
-                error(LOGTAG, e1);
+                warn(LOGTAG, e1);
             }
         } else if(isError(e, MSG_UNMODIFIED)) {
             try {
                 sender.answerCallbackQuery(acb);
             } catch (TelegramApiException e1) {
-                error(LOGTAG, e1);
+                warn(LOGTAG, e1);
             }
         }
     }

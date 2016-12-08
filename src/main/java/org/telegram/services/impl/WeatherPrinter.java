@@ -25,13 +25,9 @@ public class WeatherPrinter {
     }
 
     String printForecast(String language, JSONObject js) {
-        if (isOkResp(js)) {
-            JSONObject city = js.getJSONObject("city");
-            String cityName = city.getString("name") + " (" + city.getString("country") + ")";
-            return format(localisation.getString("weatherForecast", language), cityName, convertListOfForecastToString(js, language, true));
-        } else {
-            return localisation.getString("cityNotFound", language);
-        }
+        return isOkResp(js)
+                ? format(localisation.getString("weatherForecast", language), convertListOfForecastToString(js, language, true))
+                : localisation.getString("cityNotFound", language);
     }
 
     public String printCurrent(String language, JSONObject js) {
@@ -65,7 +61,7 @@ public class WeatherPrinter {
         String weatherDesc = weather.getString("description");
 
         return addDate
-            ? format(localisation.getString("forecastWeatherPartMetric", language), LARGE_ORANGE_DIAMOND.toString(), ofPattern("dd/mm/yyyy").format(date), emoji == null ? weatherDesc: emoji.toString(), tMax, tMin)
+            ? format(localisation.getString("forecastWeatherPartMetric", language), emoji == null ? "" : emoji.toString(), ofPattern("EEE dd.MM").format(date), tMax, tMin, weatherDesc)
             : format(localisation.getString("alertWeatherPartMetric", language), emoji == null ? weatherDesc : emoji.toString(), tMax, tMin);
     }
 
@@ -90,33 +86,14 @@ public class WeatherPrinter {
 
     private Emoji getEmojiForWeather(JSONObject weather) {
         switch (weather.getString("icon")) {
-            case "01n":
-            case "01d":
-                return SUN_WITH_FACE;
-            case "02n":
-            case "02d":
-                return SUN_BEHIND_CLOUD;
-            case "03n":
-            case "03d":
-            case "04n":
-            case "04d":
-                return CLOUD;
-            case "09n":
-            case "09d":
-            case "10n":
-            case "10d":
-                return UMBRELLA_WITH_RAIN_DROPS;
-            case "11n":
-            case "11d":
-                return HIGH_VOLTAGE_SIGN;
-            case "13n":
-            case "13d":
-                return SNOWFLAKE;
-            case "50n":
-            case "50d":
-                return FOGGY;
-            default:
-                return null;
+            case "01n": case "01d": return SUN_WITH_FACE;
+            case "02n": case "02d": return SUN_BEHIND_CLOUD;
+            case "03n": case "03d": case "04n": case "04d": return CLOUD;
+            case "09n": case "09d": case "10n": case "10d": return UMBRELLA_WITH_RAIN_DROPS;
+            case "11n": case "11d": return HIGH_VOLTAGE_SIGN;
+            case "13n": case "13d": return SNOWFLAKE;
+            case "50n": case "50d": return FOGGY;
+            default: return null;
         }
     }
 }

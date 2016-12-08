@@ -9,7 +9,6 @@ import org.telegram.telegrambots.bots.commands.BotCommand;
 import org.telegram.telegrambots.logging.BotLogger;
 
 public class WeatherCommand extends BotCommand {
-
     private static final String LOGTAG = "WEATHERCOMMAND";
     private final Weather weather;
 
@@ -26,7 +25,8 @@ public class WeatherCommand extends BotCommand {
 
     public String print() {
         try {
-            return weather.printCurrentFor(39.888599, 59.2187, "ru", "metric");
+            return weather.printCurrentFor(39.888599, 59.2187, "ru", "metric") + "\n\n" +
+                   weather.printForecastFor(39.888599, 59.2187, "ru", "metric");
         } catch (Exception e) {
             BotLogger.error(LOGTAG, e);
             return "Связь с атмосферой потеряна...";

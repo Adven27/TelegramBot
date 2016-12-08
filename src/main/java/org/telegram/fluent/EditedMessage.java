@@ -6,11 +6,7 @@ import org.telegram.telegrambots.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.bots.AbsSender;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 
-import static org.telegram.telegrambots.logging.BotLogger.error;
-
 public class EditedMessage {
-    private static final String LOGTAG = "EDIT";
-
     private final AbsSender sender;
     private Message original;
     private String msg;
@@ -50,24 +46,23 @@ public class EditedMessage {
     }
 
     public Message send() {
+        EditMessageText m = new EditMessageText();
+        m.setMessageId(original.getMessageId());
+        m.setChatId(original.getChatId().toString());
+        m.setText(msg);
+        m.enableMarkdown(enableMarkdown);
+        m.enableHtml(enableHtml);
+        if (disableWebPagePreview) {
+            m.disableWebPagePreview();
+        }
+        if (replyKeyboard != null) {
+            m.setReplyMarkup(replyKeyboard);
+        }
         try {
-            EditMessageText m = new EditMessageText();
-            m.setMessageId(original.getMessageId());
-            m.setChatId(original.getChatId().toString());
-            m.setText(msg);
-            m.enableMarkdown(enableMarkdown);
-            m.enableHtml(enableHtml);
-            if (disableWebPagePreview) {
-                m.disableWebPagePreview();
-            }
-            if (replyKeyboard != null) {
-                m.setReplyMarkup(replyKeyboard);
-            }
             return sender.editMessageText(m);
         } catch (TelegramApiException e) {
-            error(LOGTAG, e);
+            throw new ApiException(e);
         }
-        return null;
     }
 
 }

@@ -28,6 +28,7 @@ import static java.time.LocalDateTime.now;
 import static jersey.repackaged.com.google.common.collect.Lists.newArrayList;
 import static org.telegram.services.Emoji.ANCHOR;
 import static org.telegram.services.Emoji.SAILBOAT;
+import static org.telegram.telegrambots.logging.BotLogger.error;
 
 public class Main {
     private static final String LOGTAG = "MAIN";
@@ -69,10 +70,10 @@ public class Main {
                         getGameCommand(),
                         new BardakCommand(dao)));
             } catch (TelegramApiException e) {
-                BotLogger.error(LOGTAG, e);
+                error(LOGTAG, e);
             }
         } catch (Exception e) {
-            BotLogger.error(LOGTAG, e);
+            error(LOGTAG, e);
         }
     }
 
