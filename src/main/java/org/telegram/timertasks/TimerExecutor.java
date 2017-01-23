@@ -31,13 +31,11 @@ public class TimerExecutor {
     }
 
     public void schedule(CustomTimerTask task) {
-        warn(LOGTAG, "Posting new task " + task.getTaskName() + " " + executorService.toString());
         final Runnable taskWrapper = () -> {
             try {
                 task.execute();
                 task.reduceTimes();
                 schedule(task);
-                info(LOGTAG, "execute " + executorService.toString());
             } catch (Exception e) {
                 severe(LOGTAG, "Bot threw an unexpected exception at TimerExecutor", e);
             }
@@ -45,7 +43,6 @@ public class TimerExecutor {
         if (task.getTimes() != 0) {
             long time = task.computeDelay();
             executorService.schedule(taskWrapper, time, SECONDS);
-            warn(LOGTAG, "Schedule in " + time + " " + task.getTaskName() + " " + executorService.toString());
         }
     }
 

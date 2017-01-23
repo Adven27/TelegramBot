@@ -1,5 +1,8 @@
 package org.telegram.games.game2048;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,6 +15,10 @@ public class Game2048 {
     boolean myWin = false;
     boolean myLose = false;
     int myScore = 0;
+
+    public Game2048(String json) {
+        setGame(json);
+    }
 
     public Game2048() {
         resetGame();
@@ -43,6 +50,17 @@ public class Game2048 {
         }
         addTile();
         addTile();
+    }
+
+    private void setGame(String json) {
+        JSONObject jsonObject = new JSONObject(json);
+        myScore = jsonObject.getInt("score");
+        myWin = jsonObject.getBoolean("win");;
+        myLose = jsonObject.getBoolean("lose");;
+        myTiles = new Tile[4 * 4];
+        for (int i = 0; i < myTiles.length; i++) {
+            myTiles[i] = new Tile(jsonObject.getJSONArray("tiles").getJSONObject(i).getInt("value"));
+        }
     }
 
     public void left() {
@@ -96,7 +114,7 @@ public class Game2048 {
     private List<Tile> availableSpace() {
         final List<Tile> list = new ArrayList<>(16);
         for (Tile t : myTiles) {
-            if (t.isEmpty()) {
+            if (t.empty()) {
                 list.add(t);
             }
         }
@@ -163,7 +181,7 @@ public class Game2048 {
     private Tile[] moveLine(Tile[] oldLine) {
         LinkedList<Tile> l = new LinkedList<>();
         for (int i = 0; i < 4; i++) {
-            if (!oldLine[i].isEmpty())
+            if (!oldLine[i].empty())
                 l.addLast(oldLine[i]);
         }
         if (l.size() == 0) {
@@ -180,7 +198,7 @@ public class Game2048 {
 
     private Tile[] mergeLine(Tile[] oldLine) {
         LinkedList<Tile> list = new LinkedList<>();
-        for (int i = 0; i < 4 && !oldLine[i].isEmpty(); i++) {
+        for (int i = 0; i < 4 && !oldLine[i].empty(); i++) {
             int num = oldLine[i].value;
             if (i < 3 && oldLine[i].value == oldLine[i + 1].value) {
                 num *= 2;
@@ -219,6 +237,17 @@ public class Game2048 {
         System.arraycopy(re, 0, myTiles, index * 4, 4);
     }
 
+    public String toJSON() {
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("tiles", new JSONArray(myTiles));
+        jsonObject.put("win", myWin);
+        jsonObject.put("lose", myLose);
+        jsonObject.put("score", myScore);
+
+        return jsonObject.toString();
+    }
+
 
     public static class Tile {
         public int value;
@@ -231,7 +260,11 @@ public class Game2048 {
             value = num;
         }
 
-        public boolean isEmpty() {
+        public int getValue() {
+            return value;
+        }
+
+        public boolean empty() {
             return value == 0;
         }
     }
