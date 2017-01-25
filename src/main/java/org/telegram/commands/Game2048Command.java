@@ -4,8 +4,8 @@ import org.telegram.fluent.Answer;
 import org.telegram.fluent.EditedMessage;
 import org.telegram.fluent.InlineKeyboard;
 import org.telegram.games.game2048.Game2048;
-import org.telegram.mamot.services.DAO;
 import org.telegram.services.Emoji;
+import org.telegram.services.GameRepo;
 import org.telegram.telegrambots.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.api.objects.CallbackQuery;
 import org.telegram.telegrambots.api.objects.Chat;
@@ -31,11 +31,15 @@ public class Game2048Command extends CallbackCommand {
     private static final String WON_MSG = " \uD83C\uDF89\uD83C\uDF89\uD83C\uDF89";
     private static final String BORDER = "\uD83D\uDDB1";
     private static Map<String, Game2048> userGames = new HashMap<>();
-    private final DAO dao;
+    private final GameRepo dao;
 
-    public Game2048Command(DAO dao) {
+    public Game2048Command(GameRepo dao) {
         super("game2048","Game 2048");
         this.dao = dao;
+
+        dao.selectAll().forEach((name, game) -> userGames.put(name, new Game2048(game)));
+
+        System.out.println("userGames = " + userGames);
     }
 
     @Override
@@ -46,7 +50,9 @@ public class Game2048Command extends CallbackCommand {
             sendAndWaitForCallback(answer.message(screen()).keyboard(getInlineKeyboard()));
             return;
         }
-        userGames.put(userName, new Game2048());
+        Game2048 g = new Game2048();
+        userGames.put(userName, g);
+        dao.insert(userName, g.toJSON());
         sendAndWaitForCallback(answer.message(screen()).keyboard(getInlineKeyboard()));
     }
 
@@ -86,7 +92,7 @@ public class Game2048Command extends CallbackCommand {
             gs.add(g);
             msg += game.getKey() + " " + g.getScore();
 
-            dao.updateScore(g.getScore());
+            dao.update(game.getKey(), g.toJSON());
 
             if (g.isLose()) {
                 msg += LOSE_MSG;
@@ -136,8 +142,7 @@ public class Game2048Command extends CallbackCommand {
     protected void handleCallback(CallbackQuery cb, AnswerCallbackQuery acb, CommandsHandler sender) throws TelegramApiException {
         Message message = cb.getMessage();
         if (userGames.isEmpty()) {
-            sender.removeInlineKeyboard(message);
-            return;
+            dao.selectAll().forEach((name, game) -> userGames.put(name, new Game2048(game)));
         }
         String data = cb.getData();
         User from = cb.getFrom();
