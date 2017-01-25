@@ -163,11 +163,8 @@ public enum Emoji {
     SEVEN('\u0037', '\u20E3'),
     EIGHT('\u0038', '\u20E3'),
     NINE('\u0039', '\u20E3'),
-    TEN('\u0040', '\u20E3'),
+    TEN('\uD83D', '\uDD1F'),
     EMPTY_CELL(null, '\u25FB'),
-
-    A('\u0041', '\u20E3'),
-    B('\u0042', '\u20E3'),
 
     // Others
     LEFT_RIGHT_ARROW(null, '\u2194'),
