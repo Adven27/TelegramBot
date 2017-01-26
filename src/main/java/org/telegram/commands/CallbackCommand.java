@@ -15,7 +15,7 @@ abstract public class CallbackCommand extends BotCommand {
     private static final String LOGTAG = "CALLBACKCOMMAND";
     private static final int REQ_LIMIT_REACHED = 429;
     private static final int MSG_UNMODIFIED = 400;
-    private Integer messageId;
+    private int messageId;
 
     protected CallbackCommand(String id, String desc) {
         super(id, desc);
