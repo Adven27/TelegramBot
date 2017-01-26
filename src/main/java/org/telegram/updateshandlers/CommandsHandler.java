@@ -17,7 +17,6 @@ import org.telegram.timertasks.TimerExecutor;
 
 import java.util.List;
 
-import static org.telegram.BotConfig.COMMANDS_TOKEN;
 import static org.telegram.BotConfig.COMMANDS_USER;
 import static org.telegram.services.Emoji.AMBULANCE;
 
@@ -96,7 +95,7 @@ public class CommandsHandler extends TelegramLongPollingCommandBot {
 
     @Override
     public String getBotToken() {
-        return COMMANDS_TOKEN;
+        return System.getenv("TELEGRAM_TOKEN");
     }
 
     @Override
