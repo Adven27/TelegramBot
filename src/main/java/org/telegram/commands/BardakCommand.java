@@ -1,8 +1,8 @@
 package org.telegram.commands;
 
 import org.telegram.fluent.Answer;
-import org.telegram.mamot.services.BardakMenu;
-import org.telegram.mamot.services.DAO;
+import org.telegram.services.BardakMenu;
+import org.telegram.services.DAO;
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.User;
 import org.telegram.telegrambots.bots.AbsSender;
@@ -12,7 +12,7 @@ import static java.time.LocalDateTime.now;
 
 public class BardakCommand extends BotCommand {
 
-    private final org.telegram.mamot.services.DAO DAO;
+    private final org.telegram.services.DAO DAO;
 
     public BardakCommand(DAO dao) {
         super("bardak","Bardak menu");

@@ -1,7 +1,7 @@
 package org.telegram.services.impl;
 
 import org.json.JSONObject;
-import org.telegram.mamot.services.DAO;
+import org.telegram.services.DAO;
 import org.telegram.services.Emoji;
 import org.telegram.services.LocalizationService;
 

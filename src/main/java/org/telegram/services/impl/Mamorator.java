@@ -1,8 +1,11 @@
-package org.telegram.mamot.services;
+package org.telegram.services.impl;
+
+import org.telegram.services.DAO;
+import org.telegram.services.MessageTransformer;
 
 import java.util.Random;
 
-public class Mamorator {
+public class Mamorator implements MessageTransformer {
 
     private final DAO dao;
 
@@ -10,7 +13,7 @@ public class Mamorator {
         this.dao = dao;
     }
 
-    public String mamate(String m) {
+    public String transform(String m) {
         return "мам" + (m.length() < 4 ? m.substring(1) : m.substring(2)) + "... " + dao.getEndWord(new Random().nextInt(4));
     }
 

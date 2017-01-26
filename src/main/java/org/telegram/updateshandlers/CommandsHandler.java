@@ -4,9 +4,9 @@ import org.telegram.commands.CallbackCommand;
 import org.telegram.commands.HelpCommand;
 import org.telegram.fluent.Answer;
 import org.telegram.fluent.EditedMessage;
-import org.telegram.mamot.services.DAO;
-import org.telegram.mamot.services.Huerator;
-import org.telegram.mamot.services.Mamorator;
+import org.telegram.services.DAO;
+import org.telegram.services.impl.Huerator;
+import org.telegram.services.impl.Mamorator;
 import org.telegram.telegrambots.api.objects.CallbackQuery;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
@@ -63,11 +63,10 @@ public class CommandsHandler extends TelegramLongPollingCommandBot {
                     answer.message(msg.getSticker().getFileId()).send();
                 } else {
                     //TODO get rid of hard code
-                    if (msg.getText().startsWith("//")) {
-                        answer.message(new Huerator().huate(msg.getText())).send();
-                    } else {
-                        answer.message(new Mamorator(new DAO()).mamate(msg.getText())).send();
-                    }
+                    String text = msg.getText();
+                    answer.message(text)
+                          .transformWith(text.startsWith("//") ? new Huerator() : new Mamorator(new DAO()))
+                          .send();
                 }
             } else {
                 msg.getEntities().stream().filter(e -> e.getType().equals("url")).forEach(e -> answer.message("Link").send());

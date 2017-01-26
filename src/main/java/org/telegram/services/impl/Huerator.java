@@ -1,8 +1,10 @@
-package org.telegram.mamot.services;
+package org.telegram.services.impl;
+
+import org.telegram.services.MessageTransformer;
 
 import java.util.*;
 
-public class Huerator {
+public class Huerator implements MessageTransformer {
 
     private static final Set<Character> VOWELS = new HashSet<>(Arrays.asList(new Character[]{'а', 'я', 'о', 'ё', 'у', 'ю', 'ы', 'и', 'э', 'е'}));
     private static final Map<Character, Character> VOWEL_PAIRS = new HashMap<>();
@@ -16,7 +18,7 @@ public class Huerator {
         VOWEL_PAIRS.put('э', 'е');
     }
 
-    public String huate(String message) {
+    public String transform(String message) {
         String res = "";
         for (String word : removePrefix(message).toLowerCase().trim().replaceAll(" +", " ").split(" ")) {
             for (int i = 0; i < word.length(); i++) {

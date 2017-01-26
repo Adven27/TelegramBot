@@ -1,7 +1,7 @@
 package org.telegram.sokoban.model;
 
 
-import org.telegram.mamot.services.DAO;
+import org.telegram.services.DAO;
 import org.telegram.sokoban.controller.EventListener;
 
 import java.util.Set;

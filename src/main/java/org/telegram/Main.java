@@ -2,7 +2,7 @@ package org.telegram;
 
 import org.telegram.commands.*;
 import org.telegram.fluent.Answer;
-import org.telegram.mamot.services.DAO;
+import org.telegram.services.DAO;
 import org.telegram.services.Events;
 import org.telegram.services.LocalizationService;
 import org.telegram.services.SimpleSkin;

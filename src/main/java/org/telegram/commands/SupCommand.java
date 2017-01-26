@@ -1,7 +1,7 @@
 package org.telegram.commands;
 
 import org.telegram.fluent.Answer;
-import org.telegram.mamot.services.DAO;
+import org.telegram.services.DAO;
 import org.telegram.services.Stickers;
 import org.telegram.telegrambots.api.objects.Chat;
 import org.telegram.telegrambots.api.objects.User;
@@ -10,7 +10,7 @@ import org.telegram.telegrambots.bots.commands.BotCommand;
 
 public class SupCommand extends BotCommand {
 
-    private final org.telegram.mamot.services.DAO DAO;
+    private final org.telegram.services.DAO DAO;
 
     public SupCommand(DAO dao) {
         super("sup","mamot loves you");

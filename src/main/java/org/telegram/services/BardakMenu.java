@@ -1,4 +1,4 @@
-package org.telegram.mamot.services;
+package org.telegram.services;
 
 import java.time.LocalDateTime;
 

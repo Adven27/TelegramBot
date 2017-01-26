@@ -1,7 +1,7 @@
 package org.telegram.sokoban.view;
 
 
-import org.telegram.mamot.services.DAO;
+import org.telegram.services.DAO;
 import org.telegram.sokoban.controller.Controller;
 import org.telegram.sokoban.controller.EventListener;
 import org.telegram.sokoban.model.GameObject;

@@ -1,5 +1,6 @@
 package org.telegram.fluent;
 
+import org.telegram.services.MessageTransformer;
 import org.telegram.services.Stickers;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
 import org.telegram.telegrambots.api.methods.send.SendSticker;
@@ -18,6 +19,7 @@ public class Answer {
     private boolean disableWebPagePreview;
     private boolean enableHtml;
     private ReplyKeyboard replyKeyboard;
+    private MessageTransformer msgTransformer;
 
     public Answer(AbsSender sender) {
         this.sender = sender;
@@ -40,6 +42,11 @@ public class Answer {
 
     public Answer message(String msg) {
         this.msg = msg;
+        return this;
+    }
+
+    public Answer transformWith(MessageTransformer messageTransformer) {
+        this.msgTransformer = messageTransformer;
         return this;
     }
 
@@ -91,6 +98,9 @@ public class Answer {
         }
         if (replyKeyboard != null) {
             m.setReplyMarkup(replyKeyboard);
+        }
+        if (msgTransformer != null) {
+            msg = msgTransformer.transform(msg);
         }
         m.setText(msg);
         return sender.sendMessage(m);
