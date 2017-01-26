@@ -12,9 +12,9 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class SQLiteGameRepoTest {
+public class PGSQLGameRepoTest {
 
-    private SQLiteGameRepo sut = new SQLiteGameRepo();
+    private PGSQLGameRepo sut = new PGSQLGameRepo("test_games");
 
     @Before
     public void setUp() throws Exception {
