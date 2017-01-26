@@ -7,10 +7,10 @@ import static org.telegram.services.Stickers.EAT;
 import static org.telegram.services.Stickers.RUN;
 
 public enum Events {
-    EVENING("В бардак???", DRINK, LocalTime.parse("19:00:00")),
-    LUNCH("Обед!!!", EAT, LocalTime.parse("13:00:00")),
-    TEA("Чай!!!", DRINK, LocalTime.parse("17:00:00")),
-    MORNING("На работу!!!", RUN, LocalTime.parse("09:00:00"));
+    EVENING("Р’ Р±Р°СЂРґР°Рє???", DRINK, LocalTime.parse("19:00:00")),
+    LUNCH("РћР±РµРґ!!!", EAT, LocalTime.parse("13:00:00")),
+    TEA("Р§Р°Р№!!!", DRINK, LocalTime.parse("17:00:00")),
+    MORNING("РќР° СЂР°Р±РѕС‚Сѓ!!!", RUN, LocalTime.parse("09:00:00"));
 
     private final String msg;
     private final Stickers sticker;

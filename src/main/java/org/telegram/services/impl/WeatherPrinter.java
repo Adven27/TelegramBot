@@ -67,19 +67,19 @@ public class WeatherPrinter {
 
     //TODO Fix hard code
     public String printMamologda(String language, JSONObject json) {
-        return isOkResp(json) ? format("Сегодня в Мамологде %s", convertCurrentWeatherToString(json))
+        return isOkResp(json) ? format("РЎРµРіРѕРґРЅСЏ РІ РњР°РјРѕР»РѕРіРґРµ %s", convertCurrentWeatherToString(json))
                                          : localisation.getString("cityNotFound", language);
     }
 
     private String convertCurrentWeatherToString(JSONObject js) {
         String temp = js.getJSONObject("main").get("temp").toString();
         String cloudiness = js.getJSONObject("clouds").get("all") + "%";
-        String wind = js.getJSONObject("wind").get("speed") + "м/с";
+        String wind = js.getJSONObject("wind").get("speed") + "Рј/СЃ";
         JSONObject weather = js.getJSONArray("weather").getJSONObject(0);
         Emoji emoji = getEmojiForWeather(weather);
         String weatherDesc = weather.getString("description");
 
-        return format(" %s %s *%sC* ветер *%s* мамоблачность *%s*... %s",
+        return format(" %s %s *%sC* РІРµС‚РµСЂ *%s* РјР°РјРѕР±Р»Р°С‡РЅРѕСЃС‚СЊ *%s*... %s",
                 weatherDesc, emoji == null ? "" : emoji.toString(), temp, wind, cloudiness,
                 dao.getEndWord(new Random().nextInt(4)));
     }
