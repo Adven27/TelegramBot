@@ -3,8 +3,9 @@ package org.telegram.timertasks;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.telegram.telegrambots.logging.BotLogger.*;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.telegram.telegrambots.logging.BotLogger.severe;
+import static org.telegram.telegrambots.logging.BotLogger.warn;
 
 public class TimerExecutor {
     private static final String LOGTAG = "TIMEREXECUTOR";
@@ -31,19 +32,22 @@ public class TimerExecutor {
     }
 
     public void schedule(CustomTimerTask task) {
-        final Runnable taskWrapper = () -> {
-            try {
-                task.execute();
-                task.reduceTimes();
-                schedule(task);
-            } catch (Exception e) {
-                severe(LOGTAG, "Bot threw an unexpected exception at TimerExecutor", e);
-            }
-        };
         if (task.getTimes() != 0) {
-            long time = task.computeDelay();
-            executorService.schedule(taskWrapper, time, SECONDS);
+            long delay = task.computeDelay();
+            executorService.schedule(getWrapped(task), delay, MILLISECONDS);
         }
+    }
+
+    private Runnable getWrapped(CustomTimerTask task) {
+        return () -> {
+                try {
+                    task.execute();
+                    task.reduceTimes();
+                    schedule(task);
+                } catch (Exception e) {
+                    severe(LOGTAG, "Bot threw an unexpected exception at TimerExecutor", e);
+                }
+            };
     }
 
     public void stop() {
