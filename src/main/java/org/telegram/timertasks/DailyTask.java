@@ -1,9 +1,9 @@
 package org.telegram.timertasks;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 
 import static java.time.LocalDateTime.now;
+import static org.telegram.timertasks.DateUtils.getDurationInMillis;
 
 abstract public class DailyTask extends CustomTimerTask {
 
@@ -15,10 +15,10 @@ abstract public class DailyTask extends CustomTimerTask {
     public long computeDelay() {
         final LocalDateTime now = now();
         LocalDateTime nextTime = startAt();
-        while (now.compareTo(nextTime) > 0) {
+        while (getDurationInMillis(now, nextTime) < 0) {
             nextTime = nextTime.plusDays(1);
         }
-        return Duration.between(now, nextTime).getSeconds();
+        return getDurationInMillis(now, nextTime);
     }
 
     protected abstract LocalDateTime startAt();
