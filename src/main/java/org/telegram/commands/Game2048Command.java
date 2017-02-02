@@ -101,7 +101,7 @@ public class Game2048Command extends CallbackCommand {
             gameRepo.update(game.getKey(), g.toJSON());
 
             if (g.isLose()) {
-                msg += LOSE_MSG + (leaderBoard.update(game.getKey(), g) ? " В топе!!!" : "");
+                msg += LOSE_MSG;
 
             } else if (g.isWin()) {
                 msg += WON_MSG;
@@ -110,10 +110,12 @@ public class Game2048Command extends CallbackCommand {
         }
 
         if (viewLeaderBoard) {
-            msg = "";
+            msg = "\tTop\n";
             List<LeaderBoardRepo.Record> recordStream = leaderBoard.getAll();
+            int pos = 1;
             for(LeaderBoardRepo.Record record : recordStream) {
-                msg += record.user() + " " + record.score() + "\n";
+                msg += pos + ". " + record.user() + " " + record.score() + "\n";
+                pos++;
             }
         }
 
@@ -178,9 +180,10 @@ public class Game2048Command extends CallbackCommand {
                 case "right":   g.right(); break;
                 case "up":      g.up();    break;
                 case "down":    g.down();  break;
-                case "restart": g.resetGame(); break;
+                case "restart": leaderBoard.update(userName, g); g.resetGame(); break;
                 case "top": this.viewLeaderBoard = !viewLeaderBoard; break;
             }
+
         }
     }
 }
