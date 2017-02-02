@@ -1,7 +1,6 @@
 package org.telegram.services.repos.impl;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.telegram.services.repos.LeaderBoardRepo;
 
@@ -13,11 +12,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class PGSQLGameLeaderBoardRepoTest {
     private PGSQLGameLeaderBoardRepo sut = new PGSQLGameLeaderBoardRepo("test_games_leaderboard");
-
-    @Before
-    public void setUp() throws Exception {
-        sut.createTable();
-    }
 
     @After
     public void tearDown() throws Exception {

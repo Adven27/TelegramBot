@@ -7,6 +7,7 @@ import org.telegram.games.game2048.Game2048;
 import org.telegram.services.Emoji;
 import org.telegram.services.repos.GameRepo;
 import org.telegram.services.repos.LeaderBoard;
+import org.telegram.services.repos.LeaderBoardRepo;
 import org.telegram.telegrambots.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.api.objects.CallbackQuery;
 import org.telegram.telegrambots.api.objects.Chat;
@@ -28,12 +29,14 @@ public class Game2048Command extends CallbackCommand {
     private static final String LEFT = LEFT_ARROW.toString();
     private static final String RIGHT = RIGHT_ARROW.toString();
     private static final String RESTART = "\uD83D\uDD04";
+    private static final String LEADER_BOARD = "\uD83D\uDCF6";
     private static final String LOSE_MSG = " \uD83D\uDC80";
     private static final String WON_MSG = " \uD83C\uDF89\uD83C\uDF89\uD83C\uDF89";
     private static final String BORDER = "\uD83D\uDDB1";
     private static Map<String, Game2048> userGames = new HashMap<>();
     private final GameRepo gameRepo;
     private final LeaderBoard leaderBoard;
+    private boolean viewLeaderBoard = false;
 
     public Game2048Command(GameRepo gameRepo, LeaderBoard leaderBoard) {
         super("game2048","Game 2048");
@@ -65,7 +68,7 @@ public class Game2048Command extends CallbackCommand {
 
     private InlineKeyboardMarkup getInlineKeyboard() {
         return new InlineKeyboard().row(UP, "up", DOWN, "down", LEFT, "left", RIGHT, "right")
-                            .row(RESTART, "restart")
+                            .row(LEADER_BOARD,"top", RESTART, "restart")
                             .build();
     }
 
@@ -98,12 +101,20 @@ public class Game2048Command extends CallbackCommand {
             gameRepo.update(game.getKey(), g.toJSON());
 
             if (g.isLose()) {
-                msg += LOSE_MSG;
-                leaderBoard.update(game.getKey(), g);
+                msg += LOSE_MSG + (leaderBoard.update(game.getKey(), g) ? " В топе!!!" : "");
+
             } else if (g.isWin()) {
                 msg += WON_MSG;
             }
             msg += "\n";
+        }
+
+        if (viewLeaderBoard) {
+            msg = "";
+            List<LeaderBoardRepo.Record> recordStream = leaderBoard.getAll();
+            for(LeaderBoardRepo.Record record : recordStream) {
+                msg += record.user() + " " + record.score() + "\n";
+            }
         }
 
         final int maxInRow = 4;
@@ -167,7 +178,8 @@ public class Game2048Command extends CallbackCommand {
                 case "right":   g.right(); break;
                 case "up":      g.up();    break;
                 case "down":    g.down();  break;
-                case "restart": leaderBoard.update(userName, g); g.resetGame(); break;
+                case "restart": g.resetGame(); break;
+                case "top": this.viewLeaderBoard = !viewLeaderBoard; break;
             }
         }
     }

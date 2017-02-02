@@ -2,7 +2,6 @@ package org.telegram.services.impl;
 
 import com.google.common.collect.Maps;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.telegram.services.repos.impl.PGSQLGameRepo;
 
@@ -15,11 +14,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class PGSQLGameRepoTest {
     private PGSQLGameRepo sut = new PGSQLGameRepo("test_games");
-
-    @Before
-    public void setUp() throws Exception {
-        sut.createTable();
-    }
 
     @After
     public void tearDown() throws Exception {
