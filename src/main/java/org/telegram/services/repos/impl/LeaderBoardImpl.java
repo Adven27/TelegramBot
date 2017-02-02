@@ -39,8 +39,8 @@ public class LeaderBoardImpl implements LeaderBoard {
     @Override
     public List<LeaderBoardRepo.Record> getAll() {
         return boardRepo.selectAll().stream().sorted((r1, r2) -> {
-            if (r1.score() > r2.score()) return 1;
-            if (r2.score() > r1.score()) return -1;
+            if (r1.score() > r2.score()) return -1;
+            if (r2.score() > r1.score()) return 1;
             return 0;
         }).collect(Collectors.toList());
     }
