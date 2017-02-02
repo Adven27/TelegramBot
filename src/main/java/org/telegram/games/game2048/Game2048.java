@@ -14,7 +14,7 @@ public class Game2048 {
     Tile[] myTiles;
     boolean myWin = false;
     boolean myLose = false;
-    int myScore = 0;
+    long myScore = 0;
 
     public Game2048(String json) {
         setGame(json);
@@ -22,6 +22,12 @@ public class Game2048 {
 
     public Game2048() {
         resetGame();
+    }
+
+    public Game2048(long score) {
+        myScore = score;
+        myWin = myLose= false;
+        myTiles = new Tile[4 * 4];
     }
 
     public Tile[] getTiles() {
@@ -36,7 +42,7 @@ public class Game2048 {
         return myLose;
     }
 
-    public int getScore() {
+    public long getScore() {
         return myScore;
     }
 

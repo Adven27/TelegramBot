@@ -3,9 +3,9 @@ package org.telegram.commands;
 import org.telegram.fluent.Answer;
 import org.telegram.fluent.EditedMessage;
 import org.telegram.fluent.InlineKeyboard;
-import org.telegram.sokoban.controller.Controller;
-import org.telegram.sokoban.model.Direction;
-import org.telegram.sokoban.view.GameFieldPrinter;
+import org.telegram.games.sokoban.controller.Controller;
+import org.telegram.games.sokoban.model.Direction;
+import org.telegram.games.sokoban.view.GameFieldPrinter;
 import org.telegram.telegrambots.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.api.objects.CallbackQuery;
 import org.telegram.telegrambots.api.objects.Chat;
@@ -40,7 +40,7 @@ public class GameCommand extends CallbackCommand {
     private int curSkin = 0;
 
     public GameCommand(List<GameFieldPrinter> printers) {
-        super("game","..?");
+        super("score","..?");
         this.printers = printers;
     }
 

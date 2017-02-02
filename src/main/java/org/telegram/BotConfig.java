@@ -1,27 +1,8 @@
 package org.telegram;
 
 public class BotConfig {
-    public static final String WEATHER_TOKEN = "<token>";
-    public static final String WEATHER_USER = "weatherbot";
-
-    public static final String TRANSIFEX_TOKEN = "<token>";
-    public static final String TRANSIFEX_USER = "TGlanguagesbot";
-
-    public static final String FILES_TOKEN = "<token>";
-    public static final String FILES_USER = "filesbot";
-
-    public static final String DIRECTIONS_TOKEN = "<token>";
-    public static final String DIRECTIONS_USER = "directionsbot";
-
-    public static final String CHANNEL_TOKEN = "<token>";
-    public static final String CHANNEL_USER = "channelupdatesbot";
-
-    public static final String RAE_TOKEN = "<token>";
-    public static final String RAE_USER = "raebot";
-
     public static final String WEBHOOK_TOKEN = "<token>";
     public static final String WEBHOOK_USER = "webhooksamplebot";
 
-    public static final String COMMANDS_TOKEN = "285485905:AAFtVhy8o02hU0Jf8zDypEwblPWov-9ko-A";
     public static final String COMMANDS_USER = "sbertlBot";
 }

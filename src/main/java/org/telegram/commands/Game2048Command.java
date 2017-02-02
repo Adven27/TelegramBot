@@ -5,7 +5,8 @@ import org.telegram.fluent.EditedMessage;
 import org.telegram.fluent.InlineKeyboard;
 import org.telegram.games.game2048.Game2048;
 import org.telegram.services.Emoji;
-import org.telegram.services.GameRepo;
+import org.telegram.services.repos.GameRepo;
+import org.telegram.services.repos.LeaderBoard;
 import org.telegram.telegrambots.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.api.objects.CallbackQuery;
 import org.telegram.telegrambots.api.objects.Chat;
@@ -31,13 +32,15 @@ public class Game2048Command extends CallbackCommand {
     private static final String WON_MSG = " \uD83C\uDF89\uD83C\uDF89\uD83C\uDF89";
     private static final String BORDER = "\uD83D\uDDB1";
     private static Map<String, Game2048> userGames = new HashMap<>();
-    private final GameRepo dao;
+    private final GameRepo gameRepo;
+    private final LeaderBoard leaderBoard;
 
-    public Game2048Command(GameRepo dao) {
+    public Game2048Command(GameRepo gameRepo, LeaderBoard leaderBoard) {
         super("game2048","Game 2048");
-        this.dao = dao;
+        this.gameRepo = gameRepo;
+        this.leaderBoard = leaderBoard;
 
-        dao.selectAll().forEach((name, game) -> userGames.put(name, new Game2048(game)));
+        gameRepo.selectAll().forEach((name, game) -> userGames.put(name, new Game2048(game)));
 
         System.out.println("userGames = " + userGames);
     }
@@ -52,7 +55,7 @@ public class Game2048Command extends CallbackCommand {
         }
         Game2048 g = new Game2048();
         userGames.put(userName, g);
-        dao.insert(userName, g.toJSON());
+        gameRepo.insert(userName, g.toJSON());
         sendAndWaitForCallback(answer.message(screen()).keyboard(getInlineKeyboard()));
     }
 
@@ -92,10 +95,11 @@ public class Game2048Command extends CallbackCommand {
             gs.add(g);
             msg += game.getKey() + " " + g.getScore();
 
-            dao.update(game.getKey(), g.toJSON());
+            gameRepo.update(game.getKey(), g.toJSON());
 
             if (g.isLose()) {
                 msg += LOSE_MSG;
+                leaderBoard.update(game.getKey(), g);
             } else if (g.isWin()) {
                 msg += WON_MSG;
             }
@@ -142,7 +146,7 @@ public class Game2048Command extends CallbackCommand {
     protected void handleCallback(CallbackQuery cb, AnswerCallbackQuery acb, CommandsHandler sender) throws TelegramApiException {
         Message message = cb.getMessage();
         if (userGames.isEmpty()) {
-            dao.selectAll().forEach((name, game) -> userGames.put(name, new Game2048(game)));
+            gameRepo.selectAll().forEach((name, game) -> userGames.put(name, new Game2048(game)));
         }
         String data = cb.getData();
         User from = cb.getFrom();
@@ -163,7 +167,7 @@ public class Game2048Command extends CallbackCommand {
                 case "right":   g.right(); break;
                 case "up":      g.up();    break;
                 case "down":    g.down();  break;
-                case "restart": g.resetGame(); break;
+                case "restart": leaderBoard.update(userName, g); g.resetGame(); break;
             }
         }
     }

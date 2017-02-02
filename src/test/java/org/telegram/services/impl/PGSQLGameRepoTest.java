@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.telegram.services.repos.impl.PGSQLGameRepo;
 
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -13,12 +14,16 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class PGSQLGameRepoTest {
-
     private PGSQLGameRepo sut = new PGSQLGameRepo("test_games");
 
     @Before
     public void setUp() throws Exception {
         sut.createTable();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        sut.dropTable();
     }
 
     @Test
@@ -50,10 +55,5 @@ public class PGSQLGameRepoTest {
         sut.delete("kostya");
 
         assertThat(sut.selectAll().entrySet(), equalTo(expected.entrySet()));
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        sut.dropTable();
     }
 }

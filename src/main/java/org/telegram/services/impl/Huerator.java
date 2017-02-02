@@ -6,16 +6,16 @@ import java.util.*;
 
 public class Huerator implements MessageTransformer {
 
-    private static final Set<Character> VOWELS = new HashSet<>(Arrays.asList(new Character[]{'Р°', 'СЏ', 'Рѕ', 'С‘', 'Сѓ', 'СЋ', 'С‹', 'Рё', 'СЌ', 'Рµ'}));
+    private static final Set<Character> VOWELS = new HashSet<>(Arrays.asList(new Character[]{'а', 'я', 'о', 'ё', 'у', 'ю', 'ы', 'и', 'э', 'е'}));
     private static final Map<Character, Character> VOWEL_PAIRS = new HashMap<>();
     private static final String COMMAND_PREFIX = "//";
 
     static {
-        VOWEL_PAIRS.put('Р°', 'СЏ');
-        VOWEL_PAIRS.put('Рѕ', 'С‘');
-        VOWEL_PAIRS.put('Сѓ', 'СЋ');
-        VOWEL_PAIRS.put('С‹', 'Рё');
-        VOWEL_PAIRS.put('СЌ', 'Рµ');
+        VOWEL_PAIRS.put('а', 'я');
+        VOWEL_PAIRS.put('о', 'ё');
+        VOWEL_PAIRS.put('у', 'ю');
+        VOWEL_PAIRS.put('ы', 'и');
+        VOWEL_PAIRS.put('э', 'е');
     }
 
     public String transform(String message) {
@@ -30,7 +30,7 @@ public class Huerator implements MessageTransformer {
                             Character pair = VOWEL_PAIRS.get(ch);
                             word = word.replaceFirst(ch.toString(), pair.toString());
                         }
-                        word = "С…Сѓ" + word;
+                        word = "ху" + word;
                         break;
                     }
                 }

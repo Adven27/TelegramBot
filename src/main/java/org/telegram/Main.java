@@ -8,7 +8,10 @@ import org.telegram.services.LocalizationService;
 import org.telegram.services.SimpleSkin;
 import org.telegram.services.Weather;
 import org.telegram.services.impl.*;
-import org.telegram.sokoban.view.GameFieldPrinter;
+import org.telegram.games.sokoban.view.GameFieldPrinter;
+import org.telegram.services.repos.impl.LeaderBoardImpl;
+import org.telegram.services.repos.impl.PGSQLGameLeaderBoardRepo;
+import org.telegram.services.repos.impl.PGSQLGameRepo;
 import org.telegram.telegrambots.TelegramBotsApi;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 import org.telegram.telegrambots.logging.BotLogger;
@@ -66,7 +69,7 @@ public class Main {
                         new ITQuoteCommand(dao),
                         new DieCommand(),
                         new DebugCommand(),
-                        new Game2048Command(new PGSQLGameRepo()),
+                        new Game2048Command(new PGSQLGameRepo(), new LeaderBoardImpl(new PGSQLGameLeaderBoardRepo())),
                         getGameCommand(),
                         new BardakCommand(dao)));
             } catch (TelegramApiException e) {
