@@ -12,7 +12,7 @@ public class TwitterServiceImpl implements TwitterService {
     @Override
     public String getLatestTweet(String userName) {
         try {
-            Query query = new Query("from:" + "userName");
+            Query query = new Query("from:" + userName);
             QueryResult result = twitter.search(query);
             return result.getTweets().get(0).getText();
         }
