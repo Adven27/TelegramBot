@@ -2,11 +2,7 @@ package org.telegram;
 
 import org.telegram.commands.*;
 import org.telegram.fluent.Answer;
-import org.telegram.services.DAO;
-import org.telegram.services.Events;
-import org.telegram.services.LocalizationService;
-import org.telegram.services.SimpleSkin;
-import org.telegram.services.Weather;
+import org.telegram.services.*;
 import org.telegram.services.impl.*;
 import org.telegram.games.sokoban.view.GameFieldPrinter;
 import org.telegram.services.repos.impl.LeaderBoardImpl;
@@ -59,9 +55,10 @@ public class Main {
                 QuoteCommand quote = new QuoteCommand(new MessageFromURL(new QuoteResource(), new QuotePrinter()));
                 AdviceCommand advice = new AdviceCommand(new MessageFromURL(new AdviceResource(), new AdvicePrinter()));
                 JokeCommand joke = new JokeCommand(new MessageFromURL(new JokeResource(), new JokePrinter()));
+                TwitterGirlCommand girlCommand = new TwitterGirlCommand(new TwitterServiceImpl());
 
                 telegramBotsApi.registerBot(new CommandsHandler(getTimerTasks(),
-                        quote, joke, advice,
+                        quote, joke, advice, girlCommand,
                         new WeatherCommand(weather),
                         new WhoCommand(),
                         new PollCommand(),
